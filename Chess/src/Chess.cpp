@@ -1,4 +1,4 @@
-	#include "Chess.h"
+#include "Chess.h"
 
 // clear the screen "cls"
 void Chess::clear() const 
