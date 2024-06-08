@@ -10,19 +10,24 @@ using namespace std;
 
 
 struct Location{
-    int y,x;
+    int y;
+    int x;
+};
+
+enum Player{
+    White,
+    Black,
+    NoColor
 };
 
 class Piece {
     char piece_type;
 protected:
     Location _location;
-    const string color;
-
-    virtual bool is_legal_move(const Location& destination) = 0;
+    const Player color;
 
 public:
-    Piece(const char &piece_type, const string &color, const Location &location);
+    Piece(const char &piece_type, const Player &color, const Location &location);
 
     virtual ~Piece() = default;
 
@@ -30,9 +35,11 @@ public:
 
     char get_type() const;
 
-    string get_color() const;
+    Player get_color() const;
 
-    virtual int move(const Location &destination) = 0;
+    virtual void move(const Location &destination) = 0;
+
+    virtual bool is_legal_move(const Location& destination) = 0;
 };
 
 #endif //CHESS_PIECE_H

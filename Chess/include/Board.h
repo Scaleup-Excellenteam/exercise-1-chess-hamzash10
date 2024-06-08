@@ -10,23 +10,21 @@
 using namespace std;
 
 
-const char LIMIT_UP='A';
-const char LIMIT_DOWN='H';
-const char LIMIT_LEFT='1';
-const char LIMIT_RIGHT='8';
 
 class Board {
     array<array<shared_ptr<Piece>, 8>, 8> _board;
-    Location white_king_location, black_king_location;
-    string current_player;
+    shared_ptr<Piece> white_king, black_king;
+    Player current_player;
 
 
     //functions
     int check_locations(const string &input);
 
-    int update_locations(const string &input);
-
+    int check_illegal_moves(const Location& current,const Location& destination);
+    int check_legal_moves(const Location& current,const Location& destination);
     bool will_cause_check() const;
+
+    void to_lower(string& str) const;
 
 public:
     explicit Board(const string &board = "RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr");

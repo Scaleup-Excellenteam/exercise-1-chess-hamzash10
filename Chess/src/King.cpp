@@ -4,15 +4,21 @@
 
 #include "King.h"
 
-King::King(const string& color,const Location& location): Piece('k',color,location) {
+King::King(const Player& color,const Location& location): Piece('k',color,location) {
 
 }
 
-int King::move(const Location& destination) {
-
+void King::move(const Location& destination) {
+    _location.y=destination.y;
+    _location.x=destination.x;
 }
 
 bool King::is_legal_move(const Location& destination) {
+    if((_location.x==destination.x && _location.y==destination.y-1) || (_location.x==destination.x-1 && _location.y==destination.y-1)
+        || (_location.x==destination.x+1 && _location.y==destination.y-1) || (_location.x==destination.x-1 && _location.y==destination.y)
+        || (_location.x==destination.x+1 && _location.y==destination.y) || (_location.x==destination.x && _location.y==destination.y+1)
+        || (_location.x==destination.x-1 && _location.y==destination.y+1) || (_location.x==destination.x+1 && _location.y==destination.y+1))
+        return true;
     return false;
 }
 

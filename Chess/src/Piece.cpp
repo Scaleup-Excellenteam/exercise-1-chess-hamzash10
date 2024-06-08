@@ -4,8 +4,8 @@
 
 #include "Piece.h"
 
-Piece::Piece(const char &piece_type,const string& color, const Location& location):piece_type(piece_type),color(color),_location(location) {
-
+Piece::Piece(const char &piece_type,const Player& color, const Location& location):color(color),_location(location) {
+    this->piece_type=(color==White)? toupper(piece_type): tolower(piece_type);
 }
 
 Location Piece::get_location() {
@@ -16,6 +16,6 @@ char Piece::get_type() const {
     return piece_type;
 }
 
-string Piece::get_color() const {
+Player Piece::get_color() const {
     return color;
 }

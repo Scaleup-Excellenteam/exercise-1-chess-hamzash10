@@ -10,8 +10,8 @@
 
 class King: public Piece {
 public:
-    King(const string& color,const Location& location);
-    int move(const Location& destination) override;
+    King(const Player& color,const Location& location);
+    void move(const Location& destination) override;
     bool is_legal_move(const Location& destination) override;
 };
 
