@@ -9,6 +9,7 @@
 #include "King.h"
 #include "Empty.h"
 #include "Bishop.h"
+#include "Queen.h"
 
 Board::Board(const string &board):current_player(White) {
     for (int i = 0; i < board.size(); ++i) {
@@ -35,6 +36,12 @@ Board::Board(const string &board):current_player(White) {
                 break;
             case 'b':
                 _board[y][x]= make_shared<Bishop>(Black,Location(y,x));
+                break;
+            case 'Q':
+                _board[y][x]= make_shared<Queen>(White,Location(y,x));
+                break;
+            case 'q':
+                _board[y][x]= make_shared<Queen>(Black,Location(y,x));
                 break;
             case '#':
                 _board[y][x]= make_shared<Empty>(NoColor,Location(y,x));

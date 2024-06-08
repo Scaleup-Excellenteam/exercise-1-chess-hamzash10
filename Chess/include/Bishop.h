@@ -8,7 +8,7 @@
 
 #include "Piece.h"
 
-class Bishop : public Piece{
+class Bishop : virtual public Piece{
 public:
     Bishop(const Player& color,const Location& location);
     void move(const Location& destination) override;

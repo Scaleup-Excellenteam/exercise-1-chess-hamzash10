@@ -29,7 +29,9 @@ add_executable (Chess ""
         include/Empty.h
         src/Empty.cpp
         include/Bishop.h
-        src/Bishop.cpp)
+        src/Bishop.cpp
+        include/Queen.h
+        src/Queen.cpp)
 
 
 add_subdirectory (include)
