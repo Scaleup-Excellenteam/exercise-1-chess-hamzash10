@@ -157,10 +157,45 @@ bool Board::will_cause_check() const {
 
 
     //check north-west the king
+    for (int y = current_king_location.y-1, x = current_king_location.x-1; y>=0 && x>=0; --y,--x) {
+        if(_board[y][x]->get_type()=='#')
+            continue;
+        else if(diagonal.find(_board[y][x]->get_type()) != string::npos)
+            return true;
+        else
+            break;
+    }
     //check north-east the king
+    for (int y = current_king_location.y-1,x = current_king_location.x+1; y>=0 && x<8; --y,++x) {
+        if(_board[y][x]->get_type()=='#')
+            continue;
+        else if(diagonal.find(_board[y][x]->get_type()) != string::npos)
+            return true;
+        else
+            break;
+    }
     //check south-west the king
+    for (int y = current_king_location.y+1,x = current_king_location.x-1; y<8 && x>=0; ++y,--x) {
+        if(_board[y][x]->get_type()=='#')
+            continue;
+        else if(diagonal.find(_board[y][x]->get_type()) != string::npos)
+            return true;
+        else
+            break;
+    }
     //check south-east the king
+    for (int y = current_king_location.y+1,x = current_king_location.x+1; y<8 && x<8; ++y,++x) {
+        if(_board[y][x]->get_type()=='#')
+            continue;
+        else if(diagonal.find(_board[y][x]->get_type()) != string::npos)
+            return true;
+        else
+            break;
+    }
+
+
     //check for knight checks
+
     return false;
 }
 
