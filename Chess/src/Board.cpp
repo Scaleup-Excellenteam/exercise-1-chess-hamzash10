@@ -10,7 +10,10 @@
 #include "Empty.h"
 #include "Bishop.h"
 #include "Queen.h"
+#include "Knight.h"
 
+
+//TODO: castling && enpassun && pawn promotion
 Board::Board(const string &board):current_player(White) {
     for (int i = 0; i < board.size(); ++i) {
         int y=i/8;
@@ -43,9 +46,16 @@ Board::Board(const string &board):current_player(White) {
             case 'q':
                 _board[y][x]= make_shared<Queen>(Black,Location(y,x));
                 break;
+            case 'N':
+                _board[y][x]= make_shared<Knight>(White,Location(y,x));
+                break;
+            case 'n':
+                _board[y][x]= make_shared<Knight>(Black,Location(y,x));
+                break;
             case '#':
                 _board[y][x]= make_shared<Empty>(NoColor,Location(y,x));
                 break;
+            //TODO: pawns
 
         }
     }
@@ -108,6 +118,7 @@ int Board::check_legal_moves(const Location& current,const Location& destination
 }
 
 
+//TODO: checkmate
 bool Board::will_cause_check() const {
     string straight="RQ";
     string diagonal="BQ";
@@ -200,7 +211,7 @@ bool Board::will_cause_check() const {
             break;
     }
 
-
+    //TODO
     //check for knight checks
 
     return false;
