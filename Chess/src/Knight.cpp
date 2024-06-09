@@ -4,7 +4,7 @@
 
 #include "Knight.h"
 
-Knight::Knight(const Player &color, const Location &location):Piece('k',color,location) {
+Knight::Knight(const Player &color, const Location &location):Piece('n',color,location) {
 
 }
 

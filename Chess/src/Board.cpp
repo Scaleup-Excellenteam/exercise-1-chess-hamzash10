@@ -4,6 +4,9 @@
 
 #include <iostream>
 #include <list>
+#include <unordered_map>
+#include <vector>
+#include <set>
 #include "Board.h"
 #include "Rook.h"
 #include "King.h"
@@ -122,10 +125,12 @@ int Board::check_legal_moves(const Location& current,const Location& destination
 bool Board::will_cause_check() const {
     string straight="RQ";
     string diagonal="BQ";
+    string knights="N";
     shared_ptr<Piece> current_king=(current_player==White)? white_king:black_king;
     if(current_player==White){
         to_lower(straight);
         to_lower(diagonal);
+        to_lower(knights);
     }
     Location current_king_location=current_king->get_location();
 
@@ -211,8 +216,24 @@ bool Board::will_cause_check() const {
             break;
     }
 
-    //TODO
+
     //check for knight checks
+    vector<pair<int,int>> possible_locations={
+            {-2,-1},{-2,+1},{-1,+2},{+1,+2},
+            {+2,+1},{+2,-1},{+1,-2},{-1,-2}
+    };
+
+    for(auto pl:possible_locations){
+        //check if the move in the board
+        if(current_king_location.y+pl.first >=0 && current_king_location.y+pl.first<8 &&
+                current_king_location.x+pl.second>=0 && current_king_location.x+pl.second<8)
+            //check for an opponent knight
+            if (knights.find(
+                    _board[current_king_location.y + pl.first][current_king_location.x + pl.second]->get_type()) !=
+                string::npos)
+                return true;
+
+    }
 
     return false;
 }
