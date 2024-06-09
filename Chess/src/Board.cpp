@@ -14,14 +14,14 @@
 #include "Bishop.h"
 #include "Queen.h"
 #include "Knight.h"
+#include "Pawn.h"
 
 
-//TODO: castling && enpassun && pawn promotion
+//TODO: Bonus castling && en passant && pawn promotion
 Board::Board(const string &board):current_player(White) {
     for (int i = 0; i < board.size(); ++i) {
         int y=i/8;
         int x=i%8;
-        char c=board[i];
         switch (board[i]) {
             case 'R':
                 _board[y][x]= make_shared<Rook>(White,Location(y,x));
@@ -55,10 +55,16 @@ Board::Board(const string &board):current_player(White) {
             case 'n':
                 _board[y][x]= make_shared<Knight>(Black,Location(y,x));
                 break;
+            case 'P':
+                _board[y][x]= make_shared<Pawn>(White,Location(y,x));
+                break;
+            case 'p':
+                _board[y][x]= make_shared<Pawn>(Black,Location(y,x));
+                break;
             case '#':
                 _board[y][x]= make_shared<Empty>(NoColor,Location(y,x));
                 break;
-            //TODO: pawns
+
 
         }
     }
@@ -89,7 +95,14 @@ int Board::check_illegal_moves(const Location& current,const Location& destinati
         return 13;
 
     //21 - illegal movement of that piece
-    if (!_board[current.y][current.x]->is_legal_move(destination))
+    //for pawns special check if the pawn is attacking
+    string pawns="Pp";
+    if(pawns.find(_board[current.y][current.x]->get_type()) != string::npos) {
+        shared_ptr<Pawn> pawn = dynamic_pointer_cast<Pawn>(_board[current.y][current.x]);
+        if(!pawn->is_legal_move(_board[destination.y][destination.x]))
+            return 21;
+    }
+    else if (!_board[current.y][current.x]->is_legal_move(destination))
         return 21;
 
     return 0;
@@ -121,16 +134,17 @@ int Board::check_legal_moves(const Location& current,const Location& destination
 }
 
 
-//TODO: checkmate
 bool Board::will_cause_check() const {
     string straight="RQ";
     string diagonal="BQ";
     string knights="N";
+    string pawns="P";
     shared_ptr<Piece> current_king=(current_player==White)? white_king:black_king;
     if(current_player==White){
         to_lower(straight);
         to_lower(diagonal);
         to_lower(knights);
+        to_lower(pawns);
     }
     Location current_king_location=current_king->get_location();
 
@@ -179,38 +193,62 @@ bool Board::will_cause_check() const {
     }
 
 
-    //check north-west the king
+    // check north-west the king
+    // pawn check only for the black king
+    bool pawn_check=current_king->get_color()==Black;
     for (int y = current_king_location.y-1, x = current_king_location.x-1; y>=0 && x>=0; --y,--x) {
-        if(_board[y][x]->get_type()=='#')
+        if(_board[y][x]->get_type()=='#') {
+            pawn_check = false;
             continue;
-        else if(diagonal.find(_board[y][x]->get_type()) != string::npos)
+        }else if(diagonal.find(_board[y][x]->get_type()) != string::npos)
+            return true;
+        else if(pawn_check && pawns.find(_board[y][x]->get_type()) != string::npos)
             return true;
         else
             break;
+
     }
+
     //check north-east the king
+    // pawn check only for the black king
+    pawn_check=current_king->get_color()==Black;
     for (int y = current_king_location.y-1,x = current_king_location.x+1; y>=0 && x<8; --y,++x) {
-        if(_board[y][x]->get_type()=='#')
+        if(_board[y][x]->get_type()=='#') {
+            pawn_check = false;
             continue;
-        else if(diagonal.find(_board[y][x]->get_type()) != string::npos)
+        }else if(diagonal.find(_board[y][x]->get_type()) != string::npos)
+            return true;
+        else if(pawn_check && pawns.find(_board[y][x]->get_type()) != string::npos)
             return true;
         else
             break;
     }
+
     //check south-west the king
+    // pawn check only for the white king
+    pawn_check=current_king->get_color()==White;
     for (int y = current_king_location.y+1,x = current_king_location.x-1; y<8 && x>=0; ++y,--x) {
-        if(_board[y][x]->get_type()=='#')
+        if(_board[y][x]->get_type()=='#') {
+            pawn_check = false;
             continue;
-        else if(diagonal.find(_board[y][x]->get_type()) != string::npos)
+        }else if(diagonal.find(_board[y][x]->get_type()) != string::npos)
+            return true;
+        else if(pawn_check && pawns.find(_board[y][x]->get_type()) != string::npos)
             return true;
         else
             break;
     }
+
     //check south-east the king
+    // pawn check only for the white king
+    pawn_check=current_king->get_color()==White;
     for (int y = current_king_location.y+1,x = current_king_location.x+1; y<8 && x<8; ++y,++x) {
-        if(_board[y][x]->get_type()=='#')
+        if(_board[y][x]->get_type()=='#') {
+            pawn_check = false;
             continue;
-        else if(diagonal.find(_board[y][x]->get_type()) != string::npos)
+        }else if(diagonal.find(_board[y][x]->get_type()) != string::npos)
+            return true;
+        else if(pawn_check && pawns.find(_board[y][x]->get_type()) != string::npos)
             return true;
         else
             break;

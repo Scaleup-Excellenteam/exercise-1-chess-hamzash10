@@ -4,9 +4,9 @@
 
 int main()
 {
-	//string board = "RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr";
+	string board = "RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr";
 	//string board = "##########K###############################R#############r#r#####";
-    string board = "RNBQKBNR################################################rnbqkbnr";
+    //string board = "RNBQKBNR################################################rnbqkbnr";
 	Chess a(board);
     shared_ptr<Board> engine_board(make_shared<Board>(board));
     int codeResponse = 0;
