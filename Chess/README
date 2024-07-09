@@ -1,0 +1,2 @@
+i used clion to write the code, so that is how i ran it
+also i used the MinGW compiler because the <Windows.h> is included in it, so the Cygwin compiler doesnt work
