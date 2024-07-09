@@ -14,12 +14,8 @@ void King::move(const Location& destination) {
 }
 
 bool King::is_legal_move(const Location& destination) {
-    if((_location.x==destination.x && _location.y==destination.y-1) || (_location.x==destination.x-1 && _location.y==destination.y-1)
-        || (_location.x==destination.x+1 && _location.y==destination.y-1) || (_location.x==destination.x-1 && _location.y==destination.y)
-        || (_location.x==destination.x+1 && _location.y==destination.y) || (_location.x==destination.x && _location.y==destination.y+1)
-        || (_location.x==destination.x-1 && _location.y==destination.y+1) || (_location.x==destination.x+1 && _location.y==destination.y+1))
-        return true;
-    return false;
+    //if the move is one square further in any direction
+    return abs(_location.x-destination.x)<=1 && abs(_location.y-destination.y)<=1;
 }
 
 
