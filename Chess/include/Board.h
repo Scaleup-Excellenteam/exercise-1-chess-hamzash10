@@ -26,6 +26,8 @@ class Board {
 
     void to_lower(string& str) const;
     Player get_player_color(const char& ch);
+    template<class PieceType>
+    shared_ptr<PieceType> create_piece(const char& ch, Location starting_location);
 public:
     explicit Board(const string &board = "RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr");
 

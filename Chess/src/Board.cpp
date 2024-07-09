@@ -24,26 +24,29 @@ Board::Board(const string &board):current_player(White) {
         int x=i%8;
         switch (tolower(board[i])) {
             case 'r':
-                _board[x][y]= make_shared<Rook>(get_player_color(board[i]),Location(x, y));
+                _board[x][y] = create_piece<Rook>(board[i],Location(x, y));
                 break;
             case 'k':
-                _board[x][y]= make_shared<King>(get_player_color(board[i]),Location(x, y));
-                black_king=_board[x][y];
+                _board[x][y] = create_piece<King>(board[i],Location(x, y));
+                if(islower(board[i]))
+                    black_king=_board[x][y];
+                else
+                    white_king=_board[x][y];
                 break;
             case 'b':
-                _board[x][y]= make_shared<Bishop>(get_player_color(board[i]),Location(x, y));
+                _board[x][y] = create_piece<Bishop>(board[i],Location(x, y));
                 break;
             case 'q':
-                _board[x][y]= make_shared<Queen>(get_player_color(board[i]),Location(x, y));
+                _board[x][y] = create_piece<Queen>(board[i],Location(x, y));
                 break;
             case 'n':
-                _board[x][y]= make_shared<Knight>(get_player_color(board[i]),Location(x, y));
+                _board[x][y] = create_piece<Knight>(board[i],Location(x, y));
                 break;
             case 'p':
-                _board[x][y]= make_shared<Pawn>(get_player_color(board[i]),Location(x, y));
+                _board[x][y] = create_piece<Pawn>(board[i],Location(x, y));
                 break;
             case '#':
-                _board[x][y]= make_shared<Empty>(NoColor,Location(x, y));
+                _board[x][y] = create_piece<Empty>(board[i],Location(x, y));
                 break;
 
 
@@ -266,8 +269,14 @@ void Board::to_lower(string &str) const {
 }
 
 Player Board::get_player_color(const char &ch) {
-    return islower(ch)? Black:White;
+    return (ch=='#')? NoColor:islower(ch)? Black:White;
 }
+
+template<class PieceType>
+shared_ptr<PieceType> Board::create_piece(const char &ch, Location starting_location) {
+    return make_shared<PieceType>(get_player_color(ch),starting_location);
+}
+
 
 
 
