@@ -4,7 +4,7 @@
 
 
 #include <cmath>
-#include "Bishop.h"
+#include "../include/Bishop.h"
 
 Bishop::Bishop(const Player &color, const Location &location):Piece('b',color,location) {
 

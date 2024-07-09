@@ -10,8 +10,8 @@ using namespace std;
 
 
 struct Location{
-    int y;
     int x;
+    int y;
 };
 
 enum Player{

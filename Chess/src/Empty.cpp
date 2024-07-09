@@ -2,7 +2,7 @@
 // Created by 2022 on 6/8/2024.
 //
 
-#include "Empty.h"
+#include "../include/Empty.h"
 
 Empty::Empty(const Player &color, const Location& location): Piece('#',color,location) {
 

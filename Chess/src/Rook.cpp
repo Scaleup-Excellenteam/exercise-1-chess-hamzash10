@@ -3,7 +3,7 @@
 //
 
 #include <iostream>
-#include "Rook.h"
+#include "../include/Rook.h"
 
 Rook::Rook(const Player& color,const Location& location): Piece('r',color,location) {
 

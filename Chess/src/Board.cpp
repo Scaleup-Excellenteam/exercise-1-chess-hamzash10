@@ -7,14 +7,14 @@
 #include <unordered_map>
 #include <vector>
 #include <set>
-#include "Board.h"
-#include "Rook.h"
-#include "King.h"
-#include "Empty.h"
-#include "Bishop.h"
-#include "Queen.h"
-#include "Knight.h"
-#include "Pawn.h"
+#include "../include/Board.h"
+#include "../include/Rook.h"
+#include "../include/King.h"
+#include "../include/Empty.h"
+#include "../include/Bishop.h"
+#include "../include/Queen.h"
+#include "../include/Knight.h"
+#include "../include/Pawn.h"
 
 
 //TODO: Bonus castling && en passant && pawn promotion
@@ -24,45 +24,45 @@ Board::Board(const string &board):current_player(White) {
         int x=i%8;
         switch (board[i]) {
             case 'R':
-                _board[y][x]= make_shared<Rook>(White,Location(y,x));
+                _board[x][y]= make_shared<Rook>(White,Location(x, y));
                 break;
             case 'r':
-                _board[y][x]= make_shared<Rook>(Black,Location(y,x));
+                _board[x][y]= make_shared<Rook>(Black,Location(x, y));
                 break;
             case 'K':
-                _board[y][x]= make_shared<King>(White,Location(y,x));
-                white_king= _board[y][x];
+                _board[x][y]= make_shared<King>(White,Location(x, y));
+                white_king= _board[x][y];
                 break;
             case 'k':
-                _board[y][x]= make_shared<King>(Black,Location(y,x));
-                black_king=_board[y][x];
+                _board[x][y]= make_shared<King>(Black,Location(x, y));
+                black_king=_board[x][y];
                 break;
             case 'B':
-                _board[y][x]= make_shared<Bishop>(White,Location(y,x));
+                _board[x][y]= make_shared<Bishop>(White,Location(x, y));
                 break;
             case 'b':
-                _board[y][x]= make_shared<Bishop>(Black,Location(y,x));
+                _board[x][y]= make_shared<Bishop>(Black,Location(x, y));
                 break;
             case 'Q':
-                _board[y][x]= make_shared<Queen>(White,Location(y,x));
+                _board[x][y]= make_shared<Queen>(White,Location(x, y));
                 break;
             case 'q':
-                _board[y][x]= make_shared<Queen>(Black,Location(y,x));
+                _board[x][y]= make_shared<Queen>(Black,Location(x, y));
                 break;
             case 'N':
-                _board[y][x]= make_shared<Knight>(White,Location(y,x));
+                _board[x][y]= make_shared<Knight>(White,Location(x, y));
                 break;
             case 'n':
-                _board[y][x]= make_shared<Knight>(Black,Location(y,x));
+                _board[x][y]= make_shared<Knight>(Black,Location(x, y));
                 break;
             case 'P':
-                _board[y][x]= make_shared<Pawn>(White,Location(y,x));
+                _board[x][y]= make_shared<Pawn>(White,Location(x, y));
                 break;
             case 'p':
-                _board[y][x]= make_shared<Pawn>(Black,Location(y,x));
+                _board[x][y]= make_shared<Pawn>(Black,Location(x, y));
                 break;
             case '#':
-                _board[y][x]= make_shared<Empty>(NoColor,Location(y,x));
+                _board[x][y]= make_shared<Empty>(NoColor,Location(x, y));
                 break;
 
 
@@ -72,8 +72,8 @@ Board::Board(const string &board):current_player(White) {
 
 int Board::move(const string &input) {
     //convert to locations
-    Location current = {tolower(input[0]) - 'a', input[1] - '1'};
-    Location destination = {tolower(input[2]) - 'a', input[3] - '1'};
+    Location current = {input[1] - '1',tolower(input[0]) - 'a'};
+    Location destination = {input[3] - '1', tolower(input[2]) - 'a' };
 
     int response=check_illegal_moves(current,destination);
     if(!response)
@@ -83,26 +83,26 @@ int Board::move(const string &input) {
 
 int Board::check_illegal_moves(const Location& current,const Location& destination) {
     //11 - there is not piece at the source
-    if (_board[current.y][current.x]->get_type() == '#')
+    if (_board[current.x][current.y]->get_type() == '#')
         return 11;
 
     //12 - the piece in the source is piece of your opponent
-    if (_board[current.y][current.x]->get_color() != current_player)
+    if (_board[current.x][current.y]->get_color() != current_player)
         return 12;
 
     //13 - there one of your pieces at the destination
-    if (_board[destination.y][destination.x]->get_color() == current_player)
+    if (_board[destination.x][destination.y]->get_color() == current_player)
         return 13;
 
     //21 - illegal movement of that piece
     //for pawns special check if the pawn is attacking
     string pawns="Pp";
-    if(pawns.find(_board[current.y][current.x]->get_type()) != string::npos) {
-        shared_ptr<Pawn> pawn = dynamic_pointer_cast<Pawn>(_board[current.y][current.x]);
-        if(!pawn->is_legal_move(_board[destination.y][destination.x]))
+    if(pawns.find(_board[current.x][current.y]->get_type()) != string::npos) {
+        shared_ptr<Pawn> pawn = dynamic_pointer_cast<Pawn>(_board[current.x][current.y]);
+        if(!pawn->is_legal_move(_board[destination.x][destination.y]))
             return 21;
     }
-    else if (!_board[current.y][current.x]->is_legal_move(destination))
+    else if (!_board[current.x][current.y]->is_legal_move(destination))
         return 21;
 
     return 0;
@@ -110,16 +110,16 @@ int Board::check_illegal_moves(const Location& current,const Location& destinati
 
 int Board::check_legal_moves(const Location& current,const Location& destination) {
 
-    _board[current.y][current.x]->move(destination);
-    shared_ptr<Piece> destination_piece=_board[destination.y][destination.x];
-    _board[destination.y][destination.x]=_board[current.y][current.x];
-    _board[current.y][current.x]= make_shared<Empty>(NoColor,current);
+    _board[current.x][current.y]->move(destination);
+    shared_ptr<Piece> destination_piece=_board[destination.x][destination.y];
+    _board[destination.x][destination.y]=_board[current.x][current.y];
+    _board[current.x][current.y]= make_shared<Empty>(NoColor,current);
     //31 - this movement will cause you checkmate
     if (will_cause_check()) {
         //undo move
-        _board[destination.y][destination.x]->move(current);
-        _board[current.y][current.x]=_board[destination.y][destination.x];
-        _board[destination.y][destination.x]=destination_piece;
+        _board[destination.x][destination.y]->move(current);
+        _board[current.x][current.y]=_board[destination.x][destination.y];
+        _board[destination.x][destination.y]=destination_piece;
         return 31;
     }
 
@@ -151,9 +151,9 @@ bool Board::will_cause_check() const {
 
     //check above the king
     for (int y = current_king_location.y-1; y >= 0; --y) {
-        if(_board[y][current_king_location.x]->get_type()=='#')
+        if(_board[current_king_location.x][y]->get_type()=='#')
             continue;
-        else if(straight.find(_board[y][current_king_location.x]->get_type()) != string::npos)
+        else if(straight.find(_board[current_king_location.x][y]->get_type()) != string::npos)
             return true;
         else
             break;
@@ -162,9 +162,9 @@ bool Board::will_cause_check() const {
 
     //check below the king
     for (int y = current_king_location.y+1; y < 8; ++y) {
-        if(_board[y][current_king_location.x]->get_type()=='#')
+        if(_board[current_king_location.x][y]->get_type()=='#')
             continue;
-        else if(straight.find(_board[y][current_king_location.x]->get_type()) != string::npos)
+        else if(straight.find(_board[current_king_location.x][y]->get_type()) != string::npos)
             return true;
         else
             break;
@@ -173,9 +173,9 @@ bool Board::will_cause_check() const {
 
     //check left the king
     for (int x = current_king_location.x-1; x >= 0; --x) {
-        if(_board[current_king_location.y][x]->get_type()=='#')
+        if(_board[x][current_king_location.y]->get_type()=='#')
             continue;
-        else if(straight.find(_board[current_king_location.y][x]->get_type()) != string::npos)
+        else if(straight.find(_board[x][current_king_location.y]->get_type()) != string::npos)
             return true;
         else
             break;
@@ -184,9 +184,9 @@ bool Board::will_cause_check() const {
 
     //check right the king
     for (int x = current_king_location.x+1; x < 8; ++x) {
-        if(_board[current_king_location.y][x]->get_type()=='#')
+        if(_board[x][current_king_location.y]->get_type()=='#')
             continue;
-        else if(straight.find(_board[current_king_location.y][x]->get_type()) != string::npos)
+        else if(straight.find(_board[x][current_king_location.y]->get_type()) != string::npos)
             return true;
         else
             break;
@@ -197,12 +197,12 @@ bool Board::will_cause_check() const {
     // pawn check only for the black king
     bool pawn_check=current_king->get_color()==Black;
     for (int y = current_king_location.y-1, x = current_king_location.x-1; y>=0 && x>=0; --y,--x) {
-        if(_board[y][x]->get_type()=='#') {
+        if(_board[x][y]->get_type()=='#') {
             pawn_check = false;
             continue;
-        }else if(diagonal.find(_board[y][x]->get_type()) != string::npos)
+        }else if(diagonal.find(_board[x][y]->get_type()) != string::npos)
             return true;
-        else if(pawn_check && pawns.find(_board[y][x]->get_type()) != string::npos)
+        else if(pawn_check && pawns.find(_board[x][y]->get_type()) != string::npos)
             return true;
         else
             break;
@@ -213,12 +213,12 @@ bool Board::will_cause_check() const {
     // pawn check only for the black king
     pawn_check=current_king->get_color()==Black;
     for (int y = current_king_location.y-1,x = current_king_location.x+1; y>=0 && x<8; --y,++x) {
-        if(_board[y][x]->get_type()=='#') {
+        if(_board[x][y]->get_type()=='#') {
             pawn_check = false;
             continue;
-        }else if(diagonal.find(_board[y][x]->get_type()) != string::npos)
+        }else if(diagonal.find(_board[x][y]->get_type()) != string::npos)
             return true;
-        else if(pawn_check && pawns.find(_board[y][x]->get_type()) != string::npos)
+        else if(pawn_check && pawns.find(_board[x][y]->get_type()) != string::npos)
             return true;
         else
             break;
@@ -228,12 +228,12 @@ bool Board::will_cause_check() const {
     // pawn check only for the white king
     pawn_check=current_king->get_color()==White;
     for (int y = current_king_location.y+1,x = current_king_location.x-1; y<8 && x>=0; ++y,--x) {
-        if(_board[y][x]->get_type()=='#') {
+        if(_board[x][y]->get_type()=='#') {
             pawn_check = false;
             continue;
-        }else if(diagonal.find(_board[y][x]->get_type()) != string::npos)
+        }else if(diagonal.find(_board[x][y]->get_type()) != string::npos)
             return true;
-        else if(pawn_check && pawns.find(_board[y][x]->get_type()) != string::npos)
+        else if(pawn_check && pawns.find(_board[x][y]->get_type()) != string::npos)
             return true;
         else
             break;
@@ -243,12 +243,12 @@ bool Board::will_cause_check() const {
     // pawn check only for the white king
     pawn_check=current_king->get_color()==White;
     for (int y = current_king_location.y+1,x = current_king_location.x+1; y<8 && x<8; ++y,++x) {
-        if(_board[y][x]->get_type()=='#') {
+        if(_board[x][y]->get_type()=='#') {
             pawn_check = false;
             continue;
-        }else if(diagonal.find(_board[y][x]->get_type()) != string::npos)
+        }else if(diagonal.find(_board[x][y]->get_type()) != string::npos)
             return true;
-        else if(pawn_check && pawns.find(_board[y][x]->get_type()) != string::npos)
+        else if(pawn_check && pawns.find(_board[x][y]->get_type()) != string::npos)
             return true;
         else
             break;
@@ -267,7 +267,7 @@ bool Board::will_cause_check() const {
                 current_king_location.x+pl.second>=0 && current_king_location.x+pl.second<8)
             //check for an opponent knight
             if (knights.find(
-                    _board[current_king_location.y + pl.first][current_king_location.x + pl.second]->get_type()) !=
+                    _board[current_king_location.x + pl.second][current_king_location.y + pl.first]->get_type()) !=
                 string::npos)
                 return true;
 

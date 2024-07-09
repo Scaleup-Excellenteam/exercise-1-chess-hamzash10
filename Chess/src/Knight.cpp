@@ -2,7 +2,7 @@
 // Created by 2022 on 6/9/2024.
 //
 
-#include "Knight.h"
+#include "../include/Knight.h"
 
 Knight::Knight(const Player &color, const Location &location):Piece('n',color,location) {
 

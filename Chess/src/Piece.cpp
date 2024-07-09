@@ -2,7 +2,7 @@
 // Created by 2022 on 6/8/2024.
 //
 
-#include "Piece.h"
+#include "../include/Piece.h"
 
 Piece::Piece(const char &piece_type,const Player& color, const Location& location):color(color),_location(location) {
     this->piece_type=(color==White)? toupper(piece_type): tolower(piece_type);

@@ -2,7 +2,7 @@
 // Created by 2022 on 6/8/2024.
 //
 
-#include "King.h"
+#include "../include/King.h"
 
 King::King(const Player& color,const Location& location): Piece('k',color,location) {
 

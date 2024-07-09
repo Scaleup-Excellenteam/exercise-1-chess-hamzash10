@@ -2,7 +2,7 @@
 // Created by 2022 on 6/9/2024.
 //
 
-#include "Pawn.h"
+#include "../include/Pawn.h"
 
 Pawn::Pawn(const Player &color, const Location &location): Piece('p',color,location) {
 

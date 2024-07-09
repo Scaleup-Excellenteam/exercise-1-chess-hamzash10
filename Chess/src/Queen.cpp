@@ -2,7 +2,7 @@
 // Created by 2022 on 6/8/2024.
 //
 
-#include "Queen.h"
+#include "../include/Queen.h"
 
 //bishop and rook will be ignored
 Queen::Queen(const Player &color, const Location &location) : Piece('q',color, location),
