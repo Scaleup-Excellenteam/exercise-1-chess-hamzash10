@@ -21,7 +21,7 @@ bool Pawn::is_legal_move(const Location &destination) {
     if(color==White) {
         if (_location.x == destination.x && destination.y>_location.y && _location.y + legal_moves >= destination.y)
             return true;
-    }else if(color==Black) {
+    }else{
         if (_location.x == destination.x && destination.y<_location.y && _location.y - legal_moves <= destination.y)
             return true;
     }
