@@ -17,16 +17,11 @@ void Bishop::move(const Location &destination) {
 
 bool Bishop::is_legal_move(const Location &destination) {
     // since the bishop moves diagonally, I can calculate the slope of the line connecting the current location and the destination,
-    // and calculate the angel of it and check if the angel%90==45
+    // meaning deltaX must be equal to deltaY
     // am I proud of my self?
     // yes, yes I'm
-    double deltaX=destination.x-_location.x;
-    double deltaY=destination.y-_location.y;
-    double angle_in_radians = atan2(deltaY, deltaX);
-    double angle_in_degrees = angle_in_radians * 180.0 / std::numbers::pi;
-    //i checked epsilon because sometimes the calculation precise
-    return (abs(abs(angle_in_degrees) - 45 )< 0.0001 ||
-            abs(abs(angle_in_degrees) - 135) < 0.0001 ||
-            abs(abs(angle_in_degrees) - 225) < 0.0001 ||
-            abs(abs(angle_in_degrees) - 315) < 0.0001);
+    int deltaX = std::abs(destination.x - _location.x);
+    int deltaY = std::abs(destination.y - _location.y);
+
+    return deltaX == deltaY;
 }
