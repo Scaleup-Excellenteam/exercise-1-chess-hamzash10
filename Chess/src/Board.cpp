@@ -68,15 +68,15 @@ int Board::move(const string &input) {
 int Board::check_illegal_moves(const Location& current,const Location& destination) {
     //11 - there is not piece at the source
     if (_board[current.x][current.y]->get_type() == '#')
-        return 11;
+        return NoPieceAtSource;
 
     //12 - the piece in the source is piece of your opponent
     if (_board[current.x][current.y]->get_color() != current_player)
-        return 12;
+        return PieceOfOpponentAtSource;
 
     //13 - there one of your pieces at the destination
     if (_board[destination.x][destination.y]->get_color() == current_player)
-        return 13;
+        return YourPieceAtDestination;
 
     //21 - illegal movement of that piece
     //for pawns special check if the pawn is attacking
@@ -84,10 +84,10 @@ int Board::check_illegal_moves(const Location& current,const Location& destinati
     if(pawns.find(_board[current.x][current.y]->get_type()) != string::npos) {
         shared_ptr<Pawn> pawn = dynamic_pointer_cast<Pawn>(_board[current.x][current.y]);
         if(!pawn->is_legal_move(_board[destination.x][destination.y]))
-            return 21;
+            return IllegalMovementOfPiece;
     }
     else if (!_board[current.x][current.y]->is_legal_move(destination))
-        return 21;
+        return IllegalMovementOfPiece;
 
     return 0;
 }
@@ -104,17 +104,17 @@ int Board::check_legal_moves(const Location& current,const Location& destination
         _board[destination.x][destination.y]->move(current);
         _board[current.x][current.y]=_board[destination.x][destination.y];
         _board[destination.x][destination.y]=destination_piece;
-        return 31;
+        return WillCauseCheckmate;
     }
 
     //change player
     current_player = (current_player == White) ? Black : White;
     //41 - the last movement was legal and cause check
     if (will_cause_check())
-        return 41;
+        return LegalCheck;
 
     //42 - the last movement was legal, next turn
-    return 42;
+    return LegalNextTurn;
 }
 
 
