@@ -25,7 +25,7 @@ class Board {
     bool will_cause_check() const;
 
     void to_lower(string& str) const;
-
+    Player get_player_color(const char& ch);
 public:
     explicit Board(const string &board = "RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr");
 

@@ -22,44 +22,25 @@ Board::Board(const string &board):current_player(White) {
     for (int i = 0; i < board.size(); ++i) {
         int y=i/8;
         int x=i%8;
-        switch (board[i]) {
-            case 'R':
-                _board[x][y]= make_shared<Rook>(White,Location(x, y));
-                break;
+        switch (tolower(board[i])) {
             case 'r':
-                _board[x][y]= make_shared<Rook>(Black,Location(x, y));
-                break;
-            case 'K':
-                _board[x][y]= make_shared<King>(White,Location(x, y));
-                white_king= _board[x][y];
+                _board[x][y]= make_shared<Rook>(get_player_color(board[i]),Location(x, y));
                 break;
             case 'k':
-                _board[x][y]= make_shared<King>(Black,Location(x, y));
+                _board[x][y]= make_shared<King>(get_player_color(board[i]),Location(x, y));
                 black_king=_board[x][y];
                 break;
-            case 'B':
-                _board[x][y]= make_shared<Bishop>(White,Location(x, y));
-                break;
             case 'b':
-                _board[x][y]= make_shared<Bishop>(Black,Location(x, y));
-                break;
-            case 'Q':
-                _board[x][y]= make_shared<Queen>(White,Location(x, y));
+                _board[x][y]= make_shared<Bishop>(get_player_color(board[i]),Location(x, y));
                 break;
             case 'q':
-                _board[x][y]= make_shared<Queen>(Black,Location(x, y));
-                break;
-            case 'N':
-                _board[x][y]= make_shared<Knight>(White,Location(x, y));
+                _board[x][y]= make_shared<Queen>(get_player_color(board[i]),Location(x, y));
                 break;
             case 'n':
-                _board[x][y]= make_shared<Knight>(Black,Location(x, y));
-                break;
-            case 'P':
-                _board[x][y]= make_shared<Pawn>(White,Location(x, y));
+                _board[x][y]= make_shared<Knight>(get_player_color(board[i]),Location(x, y));
                 break;
             case 'p':
-                _board[x][y]= make_shared<Pawn>(Black,Location(x, y));
+                _board[x][y]= make_shared<Pawn>(get_player_color(board[i]),Location(x, y));
                 break;
             case '#':
                 _board[x][y]= make_shared<Empty>(NoColor,Location(x, y));
@@ -283,5 +264,10 @@ void Board::to_lower(string &str) const {
         str.push_back(tolower(ch));
     }
 }
+
+Player Board::get_player_color(const char &ch) {
+    return islower(ch)? Black:White;
+}
+
 
 
