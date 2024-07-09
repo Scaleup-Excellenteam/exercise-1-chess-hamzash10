@@ -20,8 +20,8 @@
 //TODO: Bonus castling && en passant && pawn promotion
 Board::Board(const string &board):current_player(White) {
     for (int i = 0; i < board.size(); ++i) {
-        int y=i/8;
-        int x=i%8;
+        int y= i / BOARD_MAX_PLACE;
+        int x= i % BOARD_MAX_PLACE;
         switch (tolower(board[i])) {
             case 'r':
                 _board[x][y] = create_piece<Rook>(board[i],Location(x, y));
@@ -134,7 +134,7 @@ bool Board::will_cause_check() const {
 
 
     //check above the king
-    for (int y = current_king_location.y-1; y >= 0; --y) {
+    for (int y = current_king_location.y-1; y >= BOARD_MIN_PLACE; --y) {
         if(_board[current_king_location.x][y]->get_type()=='#')
             continue;
         else if(straight.find(_board[current_king_location.x][y]->get_type()) != string::npos)
@@ -145,7 +145,7 @@ bool Board::will_cause_check() const {
 
 
     //check below the king
-    for (int y = current_king_location.y+1; y < 8; ++y) {
+    for (int y = current_king_location.y+1; y < BOARD_MAX_PLACE; ++y) {
         if(_board[current_king_location.x][y]->get_type()=='#')
             continue;
         else if(straight.find(_board[current_king_location.x][y]->get_type()) != string::npos)
@@ -156,7 +156,7 @@ bool Board::will_cause_check() const {
 
 
     //check left the king
-    for (int x = current_king_location.x-1; x >= 0; --x) {
+    for (int x = current_king_location.x-1; x >= BOARD_MIN_PLACE; --x) {
         if(_board[x][current_king_location.y]->get_type()=='#')
             continue;
         else if(straight.find(_board[x][current_king_location.y]->get_type()) != string::npos)
@@ -167,7 +167,7 @@ bool Board::will_cause_check() const {
 
 
     //check right the king
-    for (int x = current_king_location.x+1; x < 8; ++x) {
+    for (int x = current_king_location.x+1; x < BOARD_MAX_PLACE; ++x) {
         if(_board[x][current_king_location.y]->get_type()=='#')
             continue;
         else if(straight.find(_board[x][current_king_location.y]->get_type()) != string::npos)
@@ -180,7 +180,7 @@ bool Board::will_cause_check() const {
     // check north-west the king
     // pawn check only for the black king
     bool is_pawn_check= current_king->get_color() == Black;
-    for (int y = current_king_location.y-1, x = current_king_location.x-1; y>=0 && x>=0; --y,--x) {
+    for (int y = current_king_location.y-1, x = current_king_location.x-1; y>=BOARD_MIN_PLACE && x>=BOARD_MIN_PLACE; --y,--x) {
         if(_board[x][y]->get_type()=='#') {
             is_pawn_check = false;
             continue;
@@ -196,7 +196,7 @@ bool Board::will_cause_check() const {
     //check north-east the king
     // pawn check only for the black king
     is_pawn_check= current_king->get_color() == Black;
-    for (int y = current_king_location.y-1,x = current_king_location.x+1; y>=0 && x<8; --y,++x) {
+    for (int y = current_king_location.y-1,x = current_king_location.x+1; y>=BOARD_MIN_PLACE && x < BOARD_MAX_PLACE; --y,++x) {
         if(_board[x][y]->get_type()=='#') {
             is_pawn_check = false;
             continue;
@@ -211,7 +211,7 @@ bool Board::will_cause_check() const {
     //check south-west the king
     // pawn check only for the white king
     is_pawn_check= current_king->get_color() == White;
-    for (int y = current_king_location.y+1,x = current_king_location.x-1; y<8 && x>=0; ++y,--x) {
+    for (int y = current_king_location.y+1,x = current_king_location.x-1; y < BOARD_MAX_PLACE && x >= BOARD_MIN_PLACE; ++y,--x) {
         if(_board[x][y]->get_type()=='#') {
             is_pawn_check = false;
             continue;
@@ -226,7 +226,7 @@ bool Board::will_cause_check() const {
     //check south-east the king
     // pawn check only for the white king
     is_pawn_check= current_king->get_color() == White;
-    for (int y = current_king_location.y+1,x = current_king_location.x+1; y<8 && x<8; ++y,++x) {
+    for (int y = current_king_location.y+1,x = current_king_location.x+1; y < BOARD_MAX_PLACE && x < BOARD_MAX_PLACE; ++y,++x) {
         if(_board[x][y]->get_type()=='#') {
             is_pawn_check = false;
             continue;
@@ -247,8 +247,8 @@ bool Board::will_cause_check() const {
 
     for(auto pl:possible_locations){
         //check if the move in the board
-        if(current_king_location.y+pl.first >=0 && current_king_location.y+pl.first<8 &&
-                current_king_location.x+pl.second>=0 && current_king_location.x+pl.second<8)
+        if(current_king_location.y+pl.first >=BOARD_MIN_PLACE && current_king_location.y+pl.first < BOARD_MAX_PLACE &&
+                current_king_location.x+pl.second>=BOARD_MIN_PLACE && current_king_location.x+pl.second < BOARD_MAX_PLACE)
             //check for an opponent knight
             if (knights.find(
                     _board[current_king_location.x + pl.second][current_king_location.y + pl.first]->get_type()) !=

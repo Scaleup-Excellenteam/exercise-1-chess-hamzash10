@@ -9,7 +9,8 @@
 #include "Piece.h"
 using namespace std;
 
-
+const int BOARD_MAX_PLACE = 8;
+const int BOARD_MIN_PLACE = 8;
 
 class Board {
     array<array<shared_ptr<Piece>, 8>, 8> _board;
