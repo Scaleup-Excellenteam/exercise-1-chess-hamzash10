@@ -179,14 +179,14 @@ bool Board::will_cause_check() const {
 
     // check north-west the king
     // pawn check only for the black king
-    bool pawn_check=current_king->get_color()==Black;
+    bool is_pawn_check= current_king->get_color() == Black;
     for (int y = current_king_location.y-1, x = current_king_location.x-1; y>=0 && x>=0; --y,--x) {
         if(_board[x][y]->get_type()=='#') {
-            pawn_check = false;
+            is_pawn_check = false;
             continue;
         }else if(diagonal.find(_board[x][y]->get_type()) != string::npos)
             return true;
-        else if(pawn_check && pawns.find(_board[x][y]->get_type()) != string::npos)
+        else if(is_pawn_check && pawns.find(_board[x][y]->get_type()) != string::npos)
             return true;
         else
             break;
@@ -195,14 +195,14 @@ bool Board::will_cause_check() const {
 
     //check north-east the king
     // pawn check only for the black king
-    pawn_check=current_king->get_color()==Black;
+    is_pawn_check= current_king->get_color() == Black;
     for (int y = current_king_location.y-1,x = current_king_location.x+1; y>=0 && x<8; --y,++x) {
         if(_board[x][y]->get_type()=='#') {
-            pawn_check = false;
+            is_pawn_check = false;
             continue;
         }else if(diagonal.find(_board[x][y]->get_type()) != string::npos)
             return true;
-        else if(pawn_check && pawns.find(_board[x][y]->get_type()) != string::npos)
+        else if(is_pawn_check && pawns.find(_board[x][y]->get_type()) != string::npos)
             return true;
         else
             break;
@@ -210,14 +210,14 @@ bool Board::will_cause_check() const {
 
     //check south-west the king
     // pawn check only for the white king
-    pawn_check=current_king->get_color()==White;
+    is_pawn_check= current_king->get_color() == White;
     for (int y = current_king_location.y+1,x = current_king_location.x-1; y<8 && x>=0; ++y,--x) {
         if(_board[x][y]->get_type()=='#') {
-            pawn_check = false;
+            is_pawn_check = false;
             continue;
         }else if(diagonal.find(_board[x][y]->get_type()) != string::npos)
             return true;
-        else if(pawn_check && pawns.find(_board[x][y]->get_type()) != string::npos)
+        else if(is_pawn_check && pawns.find(_board[x][y]->get_type()) != string::npos)
             return true;
         else
             break;
@@ -225,14 +225,14 @@ bool Board::will_cause_check() const {
 
     //check south-east the king
     // pawn check only for the white king
-    pawn_check=current_king->get_color()==White;
+    is_pawn_check= current_king->get_color() == White;
     for (int y = current_king_location.y+1,x = current_king_location.x+1; y<8 && x<8; ++y,++x) {
         if(_board[x][y]->get_type()=='#') {
-            pawn_check = false;
+            is_pawn_check = false;
             continue;
         }else if(diagonal.find(_board[x][y]->get_type()) != string::npos)
             return true;
-        else if(pawn_check && pawns.find(_board[x][y]->get_type()) != string::npos)
+        else if(is_pawn_check && pawns.find(_board[x][y]->get_type()) != string::npos)
             return true;
         else
             break;
