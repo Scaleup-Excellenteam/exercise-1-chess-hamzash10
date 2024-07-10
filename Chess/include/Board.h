@@ -43,6 +43,7 @@ class Board {
     shared_ptr<PieceType> create_piece(const char& ch, Location starting_location);
     bool will_preform_castling(const Location& current,const Location& destination);
     Location is_way_clear(const Location& current,const Location& destination) const;
+    bool is_this_types(const string& types,const int& x,const int& y) const;
 public:
     explicit Board(const string &board = "RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr");
 

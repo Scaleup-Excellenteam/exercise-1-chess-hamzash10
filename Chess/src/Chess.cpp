@@ -224,7 +224,7 @@ void Chess::doTurn()
     {
         excute();
         m_turn = !m_turn;
-        m_msg = "the last movement was legal and cause castling \n";
+        m_msg = "the last movement was legal - Castling \n";
         break;
     }
     case 44:

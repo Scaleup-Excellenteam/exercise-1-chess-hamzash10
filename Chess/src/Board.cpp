@@ -17,7 +17,7 @@
 #include "../include/Pawn.h"
 
 
-//TODO: Bonus castling && en passant && pawn promotion
+//TODO: en passant && pawn promotion
 Board::Board(const string &board):current_player(White) {
     for (int i = 0; i < board.size(); ++i) {
         int y= i / BOARD_MAX_PLACE;
@@ -81,7 +81,7 @@ int Board::check_illegal_moves(const Location& current,const Location& destinati
     //21 - illegal movement of that piece
     //for pawns special check if the pawn is attacking
     string pawns="Pp";
-    if(pawns.find(_board[current.x][current.y]->get_type()) != string::npos) {
+    if(is_this_types(pawns,current.x,current.y)) {
         shared_ptr<Pawn> pawn = dynamic_pointer_cast<Pawn>(_board[current.x][current.y]);
         if(!pawn->is_legal_move(_board[destination.x][destination.y]))
             return IllegalMovementOfPiece;
@@ -157,8 +157,7 @@ bool Board::will_cause_check() const {
 
     for (auto direction: four_straight_threats) {
         piece_in_way_location = is_way_clear(current_king_location, Location(direction.first, direction.second));
-        if (piece_in_way_location != CLEAR &&
-            straight.find(_board[piece_in_way_location.x][piece_in_way_location.y]->get_type()) != string::npos)
+        if (piece_in_way_location != CLEAR && is_this_types(straight,piece_in_way_location.x,piece_in_way_location.y))
             return true;
     }
 
@@ -172,11 +171,9 @@ bool Board::will_cause_check() const {
         }
         piece_in_way_location = is_way_clear(current_king_location, Location(x, y));
         // pawn check only for the black king
-        if (piece_in_way_location != CLEAR &&
-            diagonal.find(_board[piece_in_way_location.x][piece_in_way_location.y]->get_type()) != string::npos)
+        if (piece_in_way_location != CLEAR && is_this_types(diagonal,piece_in_way_location.x,piece_in_way_location.y))
             return true;
-        else if (piece_in_way_location != CLEAR && check_pawn &&
-                 pawns.find(_board[piece_in_way_location.x][piece_in_way_location.y]->get_type()) != string::npos)
+        else if (piece_in_way_location != CLEAR && check_pawn && is_this_types(pawns,piece_in_way_location.x,piece_in_way_location.y))
             return true;
         return false;
     };
@@ -217,9 +214,7 @@ bool Board::will_cause_check() const {
             current_king_location.x + pl.second >= BOARD_MIN_PLACE &&
             current_king_location.x + pl.second < BOARD_MAX_PLACE)
             //check for an opponent knight
-            if (knights.find(
-                    _board[current_king_location.x + pl.second][current_king_location.y + pl.first]->get_type()) !=
-                string::npos)
+            if (is_this_types(knights,current_king_location.x + pl.second,current_king_location.y + pl.first))
                 return true;
 
     }
@@ -256,7 +251,7 @@ bool Board::will_preform_castling(const Location &current, const Location &desti
     string kings = "Kk";
     string rooks="Rr";
     // is the piece not a King?
-    if(kings.find(_board[current.x][current.y]->get_type()) == string::npos) //automate
+    if(!is_this_types(kings,current.x,current.y))
         return false;
 
     // check in what direction the castling is and if the king move two steps
@@ -275,8 +270,8 @@ bool Board::will_preform_castling(const Location &current, const Location &desti
     else
         return false;
 
-    //check if there is a rook in the moving direction
-    if (rooks.find(_board[rook_x_place][destination.y]->get_type()) == string::npos)
+    //check if there is not a rook in the moving direction
+    if (!is_this_types(rooks,rook_x_place,destination.y))
         return false;
 
     // check if there is no piece between the king and the rook (don't include the rook's location)
@@ -406,6 +401,10 @@ Location Board::is_way_clear(const Location &current, const Location &destinatio
         }
     }
     return CLEAR;
+}
+
+bool Board::is_this_types(const string &types, const int &x, const int &y) const {
+    return types.find(_board[x][y]->get_type()) != string::npos;
 }
 
 
