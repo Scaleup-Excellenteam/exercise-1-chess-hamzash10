@@ -10,8 +10,8 @@
 using namespace std;
 
 const int BOARD_MAX_PLACE = 8;
-const int BOARD_MIN_PLACE = 8;
-
+const int BOARD_MIN_PLACE = 0;
+const pair<int,int> CLEAR= make_pair(-1,-1);
 enum Response{
     // Illegal movements
     NoPieceAtSource = 11,
@@ -22,7 +22,9 @@ enum Response{
 
     // Legal movements
     LegalCheck = 41,
-    LegalNextTurn = 42
+    LegalNextTurn = 42,
+    Castling = 43,
+    Checkmate = 44
 };
 class Board {
     array<array<shared_ptr<Piece>, 8>, 8> _board;
@@ -41,6 +43,8 @@ class Board {
     Player get_player_color(const char& ch);
     template<class PieceType>
     shared_ptr<PieceType> create_piece(const char& ch, Location starting_location);
+    bool will_preform_castling(const Location& current,const Location& destination);
+    pair<int,int> is_way_clear(const Location& current,const Location& destination);
 public:
     explicit Board(const string &board = "RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr");
 

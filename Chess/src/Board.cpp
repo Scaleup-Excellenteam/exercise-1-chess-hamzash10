@@ -89,15 +89,25 @@ int Board::check_illegal_moves(const Location& current,const Location& destinati
     else if (!_board[current.x][current.y]->is_legal_move(destination))
         return IllegalMovementOfPiece;
 
+//    if(!is_way_clear(current,destination))
+//        return IllegalMovementOfPiece;
+
     return 0;
 }
 
 int Board::check_legal_moves(const Location& current,const Location& destination) {
 
+    //43 - the last move was Castling
+    if(will_preform_castling(current,destination)) {
+        current_player = (current_player == White) ? Black : White;
+        return Castling;
+    }
+
+
     _board[current.x][current.y]->move(destination);
     shared_ptr<Piece> destination_piece=_board[destination.x][destination.y];
     _board[destination.x][destination.y]=_board[current.x][current.y];
-    _board[current.x][current.y]= make_shared<Empty>(NoColor,current);
+    _board[current.x][current.y]= create_piece<Empty>('#',current);
     //31 - this movement will cause you checkmate
     if (will_cause_check()) {
         //undo move
@@ -112,6 +122,10 @@ int Board::check_legal_moves(const Location& current,const Location& destination
     //41 - the last movement was legal and cause check
     if (will_cause_check())
         return LegalCheck;
+
+
+    //44 - the last move was checkmate
+
 
     //42 - the last movement was legal, next turn
     return LegalNextTurn;
@@ -277,6 +291,169 @@ shared_ptr<PieceType> Board::create_piece(const char &ch, Location starting_loca
     return make_shared<PieceType>(get_player_color(ch),starting_location);
 }
 
+
+
+bool Board::will_preform_castling(const Location &current, const Location &destination) {
+    /*
+     * castling is legal only if:
+     * the king and the castle didn't move before
+     * the king isn't in check
+     * the king won't be in the check after the castling
+     * the square between the king starting location and destination isn't threatened by any piece
+     */
+
+    string kings = "Kk";
+    string rooks="Rr";
+    // is the piece not a King?
+    if(kings.find(_board[current.x][current.y]->get_type()) == string::npos) //automate
+        return false;
+
+    // check in what direction the castling is and if the king move two steps
+    int x_direction=destination.x-current.x;
+    int y_direction=destination.y-current.y;
+    string direction;//make enum
+    int rook_x_place;
+    if(x_direction==2 && y_direction==0) {
+        direction = "right";
+        rook_x_place = BOARD_MAX_PLACE-1;
+    }
+    else if(x_direction==-2 && y_direction==0) {
+        direction = "left";
+        rook_x_place = BOARD_MIN_PLACE;
+    }
+    else
+        return false;
+
+    //check if there is a rook in the moving direction
+    if (rooks.find(_board[rook_x_place][destination.y]->get_type()) == string::npos)
+        return false;
+
+    // check if there is no piece between the king and the rook (don't include the rook's location)
+    if(is_way_clear(current,Location((rook_x_place==BOARD_MIN_PLACE)? rook_x_place+1:rook_x_place-1,destination.y))!=CLEAR)
+        return false;
+
+    //check if this is the first move of the king and the rook
+    shared_ptr<Piece> current_king=(current_player==White)? white_king:black_king;
+    shared_ptr<Piece> current_rook=_board[rook_x_place][destination.y];
+    if(!dynamic_pointer_cast<King>(current_king)->is_first_move() || !dynamic_pointer_cast<Rook>(current_rook)->is_first_move())
+        return false;
+
+    //check if the square between the king's location and destination is clear
+    Location square_between{};
+    square_between.y=current.y;
+    if(direction=="right")
+        square_between.x=current.x+1;
+    else
+        square_between.x=current.x-1;
+
+    // move the king to the square between piece and check if there is a check
+    _board[current.x][current.y]->move(square_between);
+    shared_ptr<Piece> destination_piece=_board[square_between.x][square_between.y];
+    _board[square_between.x][square_between.y]=_board[current.x][current.y];
+    _board[current.x][current.y]= destination_piece;
+    if (will_cause_check()) {
+        //undo move
+        _board[square_between.x][square_between.y]->move(current);
+        _board[current.x][current.y]=_board[square_between.x][square_between.y];
+        _board[square_between.x][square_between.y]=destination_piece;
+        return false;
+    }
+    //move king to destination
+    destination_piece = _board[destination.x][destination.y];
+    _board[square_between.x][square_between.y]->move(destination);
+    _board[destination.x][destination.y]=_board[square_between.x][square_between.y];
+    _board[square_between.x][square_between.y]=destination_piece;
+    if (will_cause_check()) {
+        //undo move
+        destination_piece = _board[current.x][current.y];
+        _board[destination.x][destination.y]->move(current);
+        _board[current.x][current.y]=_board[destination.x][destination.y];
+        _board[destination.x][destination.y]=destination_piece;
+        return false;
+    }
+    //move the rook to the king's side
+    destination_piece=_board[square_between.x][square_between.y];
+    Location rook_original_location=current_rook->get_location();
+    _board[current_rook->get_location().x][current_rook->get_location().y]->move(square_between);
+    _board[square_between.x][square_between.y]=_board[rook_original_location.x][rook_original_location.y];
+    _board[rook_original_location.x][rook_original_location.y]= destination_piece;
+    return true;
+}
+
+pair<int,int> Board::is_way_clear(const Location &current, const Location &destination) {
+    /*
+     * checks if there is no piece between the current location and destination
+     * returns CLEAR if there is nothing
+     * returns the location of the piece if there is
+     */
+
+    //positive means right, negative means left
+    int deltaX = destination.x - current.x;
+    //positive means down, negative means up
+    int deltaY = destination.y - current.y;
+
+    //moving left or right
+    if (deltaY == 0) {
+        //moving right
+        for (int x = current.x + 1; x <= destination.x; ++x) {
+            if(_board[x][current.y]->get_type()=='#')
+                continue;
+            return make_pair(x,current.y);
+        }
+        //moving left
+        for (int x = current.x - 1; x >= destination.x; --x) {
+            if(_board[x][current.y]->get_type()=='#')
+                continue;
+            return make_pair(x,current.y);
+        }
+    }
+    //moving up  or down
+    else if (deltaX == 0) {
+        //moving down
+        for (int y = current.y + 1; y <= destination.y; ++y) {
+            if(_board[current.x][y]->get_type()=='#')
+                continue;
+            return make_pair(current.x,y);
+        }
+        //moving up
+        for (int y = current.y - 1; y >= destination.y; --y) {
+            if(_board[current.x][y]->get_type()=='#')
+                continue;
+            return make_pair(current.x,y);
+        }
+    }
+    //moving diagonally
+    else {
+        // check north-west
+        for (int y = current.y-1, x = current.x-1; y>=BOARD_MIN_PLACE && x>=BOARD_MIN_PLACE; --y,--x) {
+            if(_board[x][y]->get_type()=='#')
+                continue;
+            return make_pair(x,y);
+        }
+
+        //check north-east
+        for (int y = current.y-1,x = current.x+1; y>=BOARD_MIN_PLACE && x < BOARD_MAX_PLACE; --y,++x) {
+            if(_board[x][y]->get_type()=='#')
+                continue;
+            return make_pair(x,y);
+        }
+
+        //check south-west
+        for (int y = current.y+1,x = current.x-1; y < BOARD_MAX_PLACE && x >= BOARD_MIN_PLACE; ++y,--x) {
+            if(_board[x][y]->get_type()=='#')
+                continue;
+            return make_pair(x,y);
+        }
+
+        //check south-east
+        for (int y = current.y+1,x = current.x+1; y < BOARD_MAX_PLACE && x < BOARD_MAX_PLACE; ++y,++x) {
+            if(_board[x][y]->get_type()=='#')
+                continue;
+            return make_pair(x,y);
+        }
+    }
+    return CLEAR;
+}
 
 
 

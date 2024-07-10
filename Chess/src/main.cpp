@@ -4,8 +4,8 @@
 
 int main()
 {
-	string board = "RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr";
-	//string board = "##########K###############################R#############r#r#####";
+    //string board = "RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr";
+	string board = "R###K##RPPPPPPPP################################ppppppppr###k##r";
     //string board = "RNBQKBNR################################################rnbqkbnr";
 	Chess a(board);
     shared_ptr<Board> engine_board(make_shared<Board>(board));
@@ -24,7 +24,9 @@ int main()
 
 		legal movements : 
 		41 - the last movement was legal and cause check 
-		42 - the last movement was legal, next turn 
+		42 - the last movement was legal, next turn
+        43 - the last move was Castling
+        44 - the last move was checkmate
 		*/
 
 		/**/ 

@@ -5,13 +5,14 @@
 #include <iostream>
 #include "../include/Rook.h"
 
-Rook::Rook(const Player& color,const Location& location): Piece('r',color,location) {
+Rook::Rook(const Player& color,const Location& location): Piece('r',color,location),did_move(false) {
 
 }
 
 void Rook::move(const Location& destination) {
     _location.y=destination.y;
     _location.x=destination.x;
+    did_move=true;
 }
 
 bool Rook::is_legal_move(const Location& destination) {
@@ -21,3 +22,6 @@ bool Rook::is_legal_move(const Location& destination) {
     return false;
 }
 
+bool Rook::is_first_move() {
+    return !did_move;
+}

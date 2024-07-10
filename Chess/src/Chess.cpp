@@ -148,7 +148,30 @@ void Chess::excute()
 
 	row = (m_input[2] - 'a');
 	col = (m_input[3] - '1');
-	m_boardString[(row * 8) + col] = pieceInSource; 
+	m_boardString[(row * 8) + col] = pieceInSource;
+
+    // if there is castling also move the rook
+    if(m_codeResponse==43){
+        //check if its king side
+        //if the piece moved to the king side
+        if(m_input[3]-m_input[1]>0){
+            //get the king side rook
+            pieceInSource = m_boardString[(row * 8) + col + 1];
+            //empty its place
+            m_boardString[(row * 8) + col + 1] = '#';
+
+            // put the king side rook left of the king
+            m_boardString[(row * 8) + col - 1] = pieceInSource;
+        }else{// on the queen side
+            //get the queen side rook
+            pieceInSource = m_boardString[(row * 8) + col - 2];
+            //empty its place
+            m_boardString[(row * 8) + col - 2] = '#';
+
+            // put the queen side rook right of the king
+            m_boardString[(row * 8) + col + 1] = pieceInSource;
+        }
+    }
 
 	setPieces(); 
 }
@@ -197,6 +220,20 @@ void Chess::doTurn()
 		m_msg = "the last movement was legal \n";
 		break;
 	}
+    case 43:
+    {
+        excute();
+        m_turn = !m_turn;
+        m_msg = "the last movement was legal and cause castling \n";
+        break;
+    }
+    case 44:
+    {
+        excute();
+        m_turn = !m_turn;
+        m_msg = "checkmate \n";
+        break;
+    }
 	}
 }
 
@@ -252,6 +289,7 @@ void Chess::setCodeResponse(int codeResponse)
 {
 	if (((11 <= codeResponse) && (codeResponse <= 13)) ||
 		((21 == codeResponse) || (codeResponse == 31)) ||
-		((41 == codeResponse) || (codeResponse == 42)))
+		((41 == codeResponse) || (codeResponse == 42)) ||
+        ((43 == codeResponse) || (codeResponse == 44)))
 		m_codeResponse = codeResponse;
 }
