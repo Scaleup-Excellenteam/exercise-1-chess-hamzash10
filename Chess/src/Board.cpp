@@ -125,8 +125,8 @@ int Board::check_legal_moves(const Location& current,const Location& destination
 
 
     //44 - the last move was checkmate
-
-
+    if(will_cause_checkmate())
+        return Checkmate;
     //42 - the last movement was legal, next turn
     return LegalNextTurn;
 }
@@ -405,6 +405,10 @@ Location Board::is_way_clear(const Location &current, const Location &destinatio
 
 bool Board::is_this_types(const string &types, const int &x, const int &y) const {
     return types.find(_board[x][y]->get_type()) != string::npos;
+}
+
+bool Board::will_cause_checkmate() {
+    return false;
 }
 
 

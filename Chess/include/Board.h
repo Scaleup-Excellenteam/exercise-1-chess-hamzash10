@@ -44,6 +44,7 @@ class Board {
     bool will_preform_castling(const Location& current,const Location& destination);
     Location is_way_clear(const Location& current,const Location& destination) const;
     bool is_this_types(const string& types,const int& x,const int& y) const;
+    bool will_cause_checkmate();
 public:
     explicit Board(const string &board = "RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr");
 
