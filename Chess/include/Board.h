@@ -11,7 +11,7 @@ using namespace std;
 
 const int BOARD_MAX_PLACE = 8;
 const int BOARD_MIN_PLACE = 0;
-const pair<int,int> CLEAR= make_pair(-1,-1);
+const Location CLEAR(-1,-1);
 enum Response{
     // Illegal movements
     NoPieceAtSource = 11,
@@ -33,8 +33,6 @@ class Board {
 
 
     //functions
-    int check_locations(const string &input);
-
     int check_illegal_moves(const Location& current,const Location& destination);
     int check_legal_moves(const Location& current,const Location& destination);
     bool will_cause_check() const;
@@ -44,7 +42,7 @@ class Board {
     template<class PieceType>
     shared_ptr<PieceType> create_piece(const char& ch, Location starting_location);
     bool will_preform_castling(const Location& current,const Location& destination);
-    pair<int,int> is_way_clear(const Location& current,const Location& destination);
+    Location is_way_clear(const Location& current,const Location& destination) const;
 public:
     explicit Board(const string &board = "RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr");
 

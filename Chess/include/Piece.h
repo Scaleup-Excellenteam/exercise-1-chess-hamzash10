@@ -12,7 +12,12 @@ using namespace std;
 struct Location{
     int x;
     int y;
+    bool operator!=(const Location& rhs) {
+        return x!=rhs.x | y!=rhs.y;
+    }
 };
+
+
 
 enum Player{
     White,

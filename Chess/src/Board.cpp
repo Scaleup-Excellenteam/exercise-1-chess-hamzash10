@@ -133,136 +133,89 @@ int Board::check_legal_moves(const Location& current,const Location& destination
 
 
 bool Board::will_cause_check() const {
-    string straight="RQ";
-    string diagonal="BQ";
-    string knights="N";
-    string pawns="P";
-    shared_ptr<Piece> current_king=(current_player==White)? white_king:black_king;
-    if(current_player==White){
+    string straight = "RQ";
+    string diagonal = "BQ";
+    string knights = "N";
+    string pawns = "P";
+    shared_ptr<Piece> current_king = (current_player == White) ? white_king : black_king;
+    if (current_player == White) {
         to_lower(straight);
         to_lower(diagonal);
         to_lower(knights);
         to_lower(pawns);
     }
-    Location current_king_location=current_king->get_location();
+    Location current_king_location = current_king->get_location();
 
-
-    //check above the king
-    for (int y = current_king_location.y-1; y >= BOARD_MIN_PLACE; --y) {
-        if(_board[current_king_location.x][y]->get_type()=='#')
-            continue;
-        else if(straight.find(_board[current_king_location.x][y]->get_type()) != string::npos)
-            return true;
-        else
-            break;
-    }
-
-
-    //check below the king
-    for (int y = current_king_location.y+1; y < BOARD_MAX_PLACE; ++y) {
-        if(_board[current_king_location.x][y]->get_type()=='#')
-            continue;
-        else if(straight.find(_board[current_king_location.x][y]->get_type()) != string::npos)
-            return true;
-        else
-            break;
-    }
-
-
-    //check left the king
-    for (int x = current_king_location.x-1; x >= BOARD_MIN_PLACE; --x) {
-        if(_board[x][current_king_location.y]->get_type()=='#')
-            continue;
-        else if(straight.find(_board[x][current_king_location.y]->get_type()) != string::npos)
-            return true;
-        else
-            break;
-    }
-
-
-    //check right the king
-    for (int x = current_king_location.x+1; x < BOARD_MAX_PLACE; ++x) {
-        if(_board[x][current_king_location.y]->get_type()=='#')
-            continue;
-        else if(straight.find(_board[x][current_king_location.y]->get_type()) != string::npos)
-            return true;
-        else
-            break;
-    }
-
-
-    // check north-west the king
-    // pawn check only for the black king
-    bool is_pawn_check= current_king->get_color() == Black;
-    for (int y = current_king_location.y-1, x = current_king_location.x-1; y>=BOARD_MIN_PLACE && x>=BOARD_MIN_PLACE; --y,--x) {
-        if(_board[x][y]->get_type()=='#') {
-            is_pawn_check = false;
-            continue;
-        }else if(diagonal.find(_board[x][y]->get_type()) != string::npos)
-            return true;
-        else if(is_pawn_check && pawns.find(_board[x][y]->get_type()) != string::npos)
-            return true;
-        else
-            break;
-
-    }
-
-    //check north-east the king
-    // pawn check only for the black king
-    is_pawn_check= current_king->get_color() == Black;
-    for (int y = current_king_location.y-1,x = current_king_location.x+1; y>=BOARD_MIN_PLACE && x < BOARD_MAX_PLACE; --y,++x) {
-        if(_board[x][y]->get_type()=='#') {
-            is_pawn_check = false;
-            continue;
-        }else if(diagonal.find(_board[x][y]->get_type()) != string::npos)
-            return true;
-        else if(is_pawn_check && pawns.find(_board[x][y]->get_type()) != string::npos)
-            return true;
-        else
-            break;
-    }
-
-    //check south-west the king
-    // pawn check only for the white king
-    is_pawn_check= current_king->get_color() == White;
-    for (int y = current_king_location.y+1,x = current_king_location.x-1; y < BOARD_MAX_PLACE && x >= BOARD_MIN_PLACE; ++y,--x) {
-        if(_board[x][y]->get_type()=='#') {
-            is_pawn_check = false;
-            continue;
-        }else if(diagonal.find(_board[x][y]->get_type()) != string::npos)
-            return true;
-        else if(is_pawn_check && pawns.find(_board[x][y]->get_type()) != string::npos)
-            return true;
-        else
-            break;
-    }
-
-    //check south-east the king
-    // pawn check only for the white king
-    is_pawn_check= current_king->get_color() == White;
-    for (int y = current_king_location.y+1,x = current_king_location.x+1; y < BOARD_MAX_PLACE && x < BOARD_MAX_PLACE; ++y,++x) {
-        if(_board[x][y]->get_type()=='#') {
-            is_pawn_check = false;
-            continue;
-        }else if(diagonal.find(_board[x][y]->get_type()) != string::npos)
-            return true;
-        else if(is_pawn_check && pawns.find(_board[x][y]->get_type()) != string::npos)
-            return true;
-        else
-            break;
-    }
-
-
-    //check for knight checks
-    vector<pair<int,int>> possible_locations={
-            {-2,-1},{-2,+1},{-1,+2},{+1,+2},
-            {+2,+1},{+2,-1},{+1,-2},{-1,-2}
+    //this will store the piece is in the king's way
+    Location piece_in_way_location{};
+    vector<pair<int, int>> four_straight_threats = {
+            {current_king_location.x, BOARD_MIN_PLACE}, // above the king
+            {current_king_location.x, BOARD_MAX_PLACE}, // below the king
+            {BOARD_MIN_PLACE,         current_king_location.y}, // left the king
+            {BOARD_MAX_PLACE,         current_king_location.y}  // right the king
     };
 
-    for(auto pl:possible_locations){
+    for (auto direction: four_straight_threats) {
+        piece_in_way_location = is_way_clear(current_king_location, Location(direction.first, direction.second));
+        if (piece_in_way_location != CLEAR &&
+            straight.find(_board[piece_in_way_location.x][piece_in_way_location.y]->get_type()) != string::npos)
+            return true;
+    }
+
+    //this helper lambda function will check the diagonal directions
+    auto check_diagonal_threat = [&](int x_dir, int y_dir, bool check_pawn) {
+        int x = current_king_location.x;
+        int y = current_king_location.y;
+        while (x >= BOARD_MIN_PLACE && x <= BOARD_MAX_PLACE && y >= BOARD_MIN_PLACE && y <= BOARD_MAX_PLACE) {
+            x += x_dir;
+            y += y_dir;
+        }
+        piece_in_way_location = is_way_clear(current_king_location, Location(x, y));
+        // pawn check only for the black king
+        if (piece_in_way_location != CLEAR &&
+            diagonal.find(_board[piece_in_way_location.x][piece_in_way_location.y]->get_type()) != string::npos)
+            return true;
+        else if (piece_in_way_location != CLEAR && check_pawn &&
+                 pawns.find(_board[piece_in_way_location.x][piece_in_way_location.y]->get_type()) != string::npos)
+            return true;
+        return false;
+    };
+
+    // check north-west the king
+    if (check_diagonal_threat(-1, -1,(current_king->get_color() == Black) &&
+                                       (piece_in_way_location.x == current_king_location.x - 1) &&
+                                       (piece_in_way_location.y == current_king_location.y - 1))) return true;
+    //check north-east the king
+    if (check_diagonal_threat(+1, -1, (current_king->get_color() == Black) &&
+                                      (piece_in_way_location.x == current_king_location.x + 1) &&
+                                      (piece_in_way_location.y == current_king_location.y - 1))) return true;
+    //check south-west the king
+    if (check_diagonal_threat(-1, +1, (current_king->get_color() == White) &&
+                                      (piece_in_way_location.x == current_king_location.x - 1) &&
+                                      (piece_in_way_location.y == current_king_location.y + 1))) return true;
+    //check south-east the king
+    if (check_diagonal_threat(+1, +1, (current_king->get_color() == White) &&
+                                      (piece_in_way_location.x == current_king_location.x + 1) &&
+                                      (piece_in_way_location.y == current_king_location.y + 1))) return true;
+
+    //check for knight checks
+    vector<pair<int, int>> possible_locations = {
+            {-2, -1},
+            {-2, +1},
+            {-1, +2},
+            {+1, +2},
+            {+2, +1},
+            {+2, -1},
+            {+1, -2},
+            {-1, -2}
+    };
+
+    for (auto pl: possible_locations) {
         //check if the move in the board
-        if(current_king_location.y+pl.first >=BOARD_MIN_PLACE && current_king_location.y+pl.first < BOARD_MAX_PLACE &&
-                current_king_location.x+pl.second>=BOARD_MIN_PLACE && current_king_location.x+pl.second < BOARD_MAX_PLACE)
+        if (current_king_location.y + pl.first >= BOARD_MIN_PLACE &&
+            current_king_location.y + pl.first < BOARD_MAX_PLACE &&
+            current_king_location.x + pl.second >= BOARD_MIN_PLACE &&
+            current_king_location.x + pl.second < BOARD_MAX_PLACE)
             //check for an opponent knight
             if (knights.find(
                     _board[current_king_location.x + pl.second][current_king_location.y + pl.first]->get_type()) !=
@@ -290,8 +243,6 @@ template<class PieceType>
 shared_ptr<PieceType> Board::create_piece(const char &ch, Location starting_location) {
     return make_shared<PieceType>(get_player_color(ch),starting_location);
 }
-
-
 
 bool Board::will_preform_castling(const Location &current, const Location &destination) {
     /*
@@ -380,7 +331,7 @@ bool Board::will_preform_castling(const Location &current, const Location &desti
     return true;
 }
 
-pair<int,int> Board::is_way_clear(const Location &current, const Location &destination) {
+Location Board::is_way_clear(const Location &current, const Location &destination) const {
     /*
      * checks if there is no piece between the current location and destination
      * returns CLEAR if there is nothing
@@ -398,13 +349,13 @@ pair<int,int> Board::is_way_clear(const Location &current, const Location &desti
         for (int x = current.x + 1; x <= destination.x; ++x) {
             if(_board[x][current.y]->get_type()=='#')
                 continue;
-            return make_pair(x,current.y);
+            return Location(x,current.y);
         }
         //moving left
         for (int x = current.x - 1; x >= destination.x; --x) {
             if(_board[x][current.y]->get_type()=='#')
                 continue;
-            return make_pair(x,current.y);
+            return Location(x,current.y);
         }
     }
     //moving up  or down
@@ -413,43 +364,45 @@ pair<int,int> Board::is_way_clear(const Location &current, const Location &desti
         for (int y = current.y + 1; y <= destination.y; ++y) {
             if(_board[current.x][y]->get_type()=='#')
                 continue;
-            return make_pair(current.x,y);
+            return Location(current.x,y);
         }
         //moving up
         for (int y = current.y - 1; y >= destination.y; --y) {
             if(_board[current.x][y]->get_type()=='#')
                 continue;
-            return make_pair(current.x,y);
+            return Location(current.x,y);
         }
     }
     //moving diagonally
-    else {
+    else if(deltaX<0 && deltaY<0) {
         // check north-west
-        for (int y = current.y-1, x = current.x-1; y>=BOARD_MIN_PLACE && x>=BOARD_MIN_PLACE; --y,--x) {
-            if(_board[x][y]->get_type()=='#')
+        for (int y = current.y - 1, x = current.x - 1; y >= BOARD_MIN_PLACE && x >= BOARD_MIN_PLACE; --y, --x) {
+            if (_board[x][y]->get_type() == '#')
                 continue;
-            return make_pair(x,y);
+            return Location(x, y);
         }
-
+    }else if(deltaX>0 && deltaY<0) {
         //check north-east
-        for (int y = current.y-1,x = current.x+1; y>=BOARD_MIN_PLACE && x < BOARD_MAX_PLACE; --y,++x) {
-            if(_board[x][y]->get_type()=='#')
+        for (int y = current.y - 1, x = current.x + 1; y >= BOARD_MIN_PLACE && x < BOARD_MAX_PLACE; --y, ++x) {
+            if (_board[x][y]->get_type() == '#')
                 continue;
-            return make_pair(x,y);
+            return Location(x, y);
         }
-
+    }
+    else if(deltaX<0 && deltaY>0) {
         //check south-west
-        for (int y = current.y+1,x = current.x-1; y < BOARD_MAX_PLACE && x >= BOARD_MIN_PLACE; ++y,--x) {
-            if(_board[x][y]->get_type()=='#')
+        for (int y = current.y + 1, x = current.x - 1; y < BOARD_MAX_PLACE && x >= BOARD_MIN_PLACE; ++y, --x) {
+            if (_board[x][y]->get_type() == '#')
                 continue;
-            return make_pair(x,y);
+            return Location(x, y);
         }
-
+    }
+    else if(deltaX>0 && deltaY>0) {
         //check south-east
-        for (int y = current.y+1,x = current.x+1; y < BOARD_MAX_PLACE && x < BOARD_MAX_PLACE; ++y,++x) {
-            if(_board[x][y]->get_type()=='#')
+        for (int y = current.y + 1, x = current.x + 1; y < BOARD_MAX_PLACE && x < BOARD_MAX_PLACE; ++y, ++x) {
+            if (_board[x][y]->get_type() == '#')
                 continue;
-            return make_pair(x,y);
+            return Location(x, y);
         }
     }
     return CLEAR;
