@@ -35,7 +35,9 @@ add_executable (Chess ""
         src/Knight.cpp
         include/Knight.h
         include/Pawn.h
-        src/Pawn.cpp)
+        src/Pawn.cpp
+        include/PriorityQueue.h
+        src/PriorityQueue.cpp)
 
 
 add_subdirectory (include)
