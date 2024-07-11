@@ -78,6 +78,15 @@ int Board::check_illegal_moves(const Location& current,const Location& destinati
     if (_board[destination.x][destination.y]->get_color() == current_player)
         return YourPieceAtDestination;
 
+    //before checking if the move is legal, if the king is in check then disable the castling option
+    string kings = "Kk";
+    // is the piece a King, that is checked?
+    if(is_this_types(kings,current.x,current.y) && will_cause_check()){
+        //move the king back and forward to disable the castling
+        _board[current.x][current.y]->move(destination);
+        _board[current.x][current.y]->move(current);
+    }
+
     //21 - illegal movement of that piece
     //for pawns special check if the pawn is attacking
     string pawns="Pp";
