@@ -113,11 +113,17 @@ void Chess::displayBoard() const
 }
 // print the who is turn before getting input 
 void Chess::showAskInput() const 
-{
-	if (m_turn)
-		cout << "Player 1 (White - Capital letters) >> ";
-	else
-		cout << "Player 2 (Black - Small letters)   >> ";
+{   if(m_codeResponse!=44) {
+        if (m_turn)
+            cout << "Player 1 (White - Capital letters) >> ";
+        else
+            cout << "Player 2 (Black - Small letters)   >> ";
+    }else{
+        if (m_turn)
+            cout << "Player 2 WON! (enter any key to exit) >> ";
+        else
+            cout << "Player 1 WON! (enter any key to exit) >> ";
+    }
 }
 // check if the source and dest are the same 
 bool Chess::isSame() const 
@@ -259,6 +265,10 @@ string Chess::getInput()
 	showAskInput();
 
 	cin >> m_input;
+
+    if(m_codeResponse==44)
+        return "exit";
+
 	if (isExit())
 		return "exit";
 	while (!isValid() || isSame())

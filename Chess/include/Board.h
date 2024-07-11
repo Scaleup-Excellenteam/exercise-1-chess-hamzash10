@@ -9,8 +9,7 @@
 #include "Piece.h"
 using namespace std;
 
-const int BOARD_MAX_PLACE = 8;
-const int BOARD_MIN_PLACE = 0;
+
 const Location CLEAR(-1,-1);
 enum Response{
     // Illegal movements

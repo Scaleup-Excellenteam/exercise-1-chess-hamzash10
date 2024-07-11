@@ -6,8 +6,12 @@
 #define CHESS_PIECE_H
 
 #include <memory>
+#include <vector>
+
 using namespace std;
 
+const int BOARD_MAX_PLACE = 8;
+const int BOARD_MIN_PLACE = 0;
 
 struct Location{
     int x;
@@ -45,6 +49,8 @@ public:
     virtual void move(const Location &destination) = 0;
 
     virtual bool is_legal_move(const Location& destination) = 0;
+
+    virtual vector<shared_ptr<Location>> all_possible_moves()=0;
 };
 
 #endif //CHESS_PIECE_H

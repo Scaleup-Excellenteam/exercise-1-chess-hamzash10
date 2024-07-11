@@ -89,8 +89,11 @@ int Board::check_illegal_moves(const Location& current,const Location& destinati
     else if (!_board[current.x][current.y]->is_legal_move(destination))
         return IllegalMovementOfPiece;
 
-//    if(!is_way_clear(current,destination))
-//        return IllegalMovementOfPiece;
+    auto piece_in_way_location=is_way_clear(current,destination);
+    if(piece_in_way_location!=CLEAR) {
+        if(_board[piece_in_way_location.x][piece_in_way_location.y]->get_color()==current_player)
+            return IllegalMovementOfPiece;
+    }
 
     return 0;
 }
@@ -120,13 +123,13 @@ int Board::check_legal_moves(const Location& current,const Location& destination
     //change player
     current_player = (current_player == White) ? Black : White;
     //41 - the last movement was legal and cause check
-    if (will_cause_check())
+    if (will_cause_check()) {
+        //44 - the last move was checkmate
+        if (will_cause_checkmate())
+            return Checkmate;
         return LegalCheck;
+    }
 
-
-    //44 - the last move was checkmate
-    if(will_cause_checkmate())
-        return Checkmate;
     //42 - the last movement was legal, next turn
     return LegalNextTurn;
 }
@@ -333,6 +336,10 @@ Location Board::is_way_clear(const Location &current, const Location &destinatio
      * returns the location of the piece if there is
      */
 
+    //knights can jump over pieces so this logic doesn't apply on them
+    if(is_this_types("Nn",current.x,current.y))
+        return CLEAR;
+
     //positive means right, negative means left
     int deltaX = destination.x - current.x;
     //positive means down, negative means up
@@ -408,8 +415,41 @@ bool Board::is_this_types(const string &types, const int &x, const int &y) const
 }
 
 bool Board::will_cause_checkmate() {
-    return false;
+    /*
+     * this will run only if the opponent king is in check
+     * getting all the possible moves for each piece and checking if there is one that can save the king by blocking the check
+     */
+
+    //get all the pieces
+    vector<shared_ptr<Piece>> threatened_king_pieces;
+    for (int x = 0; x < BOARD_MAX_PLACE; ++x)
+        for (int y = 0; y < BOARD_MAX_PLACE; ++y)
+            if (_board[x][y]->get_color() == current_player)
+                threatened_king_pieces.push_back(_board[x][y]);
+
+    for(auto piece: threatened_king_pieces){
+        vector<shared_ptr<Location>> possible_moves = piece->all_possible_moves();
+        for(auto move : possible_moves){
+            int response = check_illegal_moves(piece->get_location(),*move);
+            if(!response) {
+                auto starting_location=piece->get_location();
+                response = check_legal_moves(piece->get_location(), *move);
+                if(response==LegalNextTurn || response==LegalCheck || response== Checkmate){
+                    /*
+                     * LegalNextTurn: this move clears the check.
+                     * LegalCheck: this move clears the check and check the opponent king back.
+                     * Checkmate: this move clears the check and checkmates the opponent king.
+                     */
+                    //undo move
+                    _board[move->x][move->y]->move(starting_location);
+                    shared_ptr<Piece> destination_piece=_board[starting_location.x][starting_location.y];
+                    _board[starting_location.x][starting_location.y]=_board[move->x][move->y];
+                    _board[move->x][move->y]= destination_piece;
+                    current_player = (current_player == White) ? Black : White;
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
 }
-
-
-

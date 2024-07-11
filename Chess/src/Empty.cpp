@@ -16,3 +16,7 @@ bool Empty::is_legal_move(const Location& destination) {
     return true;
 }
 
+vector<shared_ptr<Location>> Empty::all_possible_moves() {
+    return vector<shared_ptr<Location>>();
+}
+

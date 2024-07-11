@@ -25,3 +25,30 @@ bool Bishop::is_legal_move(const Location &destination) {
 
     return deltaX == deltaY;
 }
+
+vector<shared_ptr<Location>> Bishop::all_possible_moves() {
+    vector<shared_ptr<Location>> possible_moves;
+
+    // all bishop directions
+    vector<pair<int,int>> diagonals={
+            {-1,-1}, // north-west
+            {+1,-1}, // north-east
+            {-1,+1}, // south-west
+            {+1,+1} // south-east
+    };
+
+    for(auto direction:diagonals){
+        int x=_location.x;
+        int y=_location.y;
+
+        while (true) {
+            x+=direction.first;
+            y+=direction.second;
+            if (x < BOARD_MIN_PLACE || x >= BOARD_MAX_PLACE || y < BOARD_MIN_PLACE || y >= BOARD_MAX_PLACE) {
+                break;
+            }
+            possible_moves.push_back(std::make_shared<Location>(x, y));
+        }
+    }
+    return possible_moves;
+}

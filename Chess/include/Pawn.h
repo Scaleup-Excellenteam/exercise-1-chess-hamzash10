@@ -14,6 +14,7 @@ public:
     void move(const Location& destination) override;
     bool is_legal_move(const Location& destination) override;
     bool is_legal_move(shared_ptr<Piece> piece_to_attack);
+    vector<shared_ptr<Location>> all_possible_moves() override;
 };
 
 
