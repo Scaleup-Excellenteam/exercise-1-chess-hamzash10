@@ -44,6 +44,7 @@ class Board {
     Location is_way_clear(const Location& current,const Location& destination) const;
     bool is_this_types(const string& types,const int& x,const int& y) const;
     bool will_cause_checkmate();
+    void change_places(const Location& current,const Location& destination,shared_ptr<Piece> destination_piece= nullptr);
 public:
     explicit Board(const string &board = "RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr");
 

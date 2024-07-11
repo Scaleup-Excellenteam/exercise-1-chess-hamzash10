@@ -12,10 +12,10 @@ int main()
                    "########"
                    "pppppppp"
                    "rnbqkbnr";
-    string board = "RNBQK##R"
-                   "PPPP###P"
+    string board = "RNBQ#K#R"
+                   "PPPP###q"
                    "####PP##"
-                   "######Pq"
+                   "######P#"
                    "########"
                    "####p###"
                    "pppp#ppp"

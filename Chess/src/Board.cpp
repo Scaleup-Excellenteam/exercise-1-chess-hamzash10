@@ -115,17 +115,12 @@ int Board::check_legal_moves(const Location& current,const Location& destination
         return Castling;
     }
 
-
-    _board[current.x][current.y]->move(destination);
     shared_ptr<Piece> destination_piece=_board[destination.x][destination.y];
-    _board[destination.x][destination.y]=_board[current.x][current.y];
-    _board[current.x][current.y]= create_piece<Empty>('#',current);
+    change_places(current,destination);
     //31 - this movement will cause you checkmate
     if (will_cause_check()) {
         //undo move
-        _board[destination.x][destination.y]->move(current);
-        _board[current.x][current.y]=_board[destination.x][destination.y];
-        _board[destination.x][destination.y]=destination_piece;
+        change_places(destination,current, destination_piece);
         return WillCauseCheckmate;
     }
 
@@ -305,36 +300,23 @@ bool Board::will_preform_castling(const Location &current, const Location &desti
         square_between.x=current.x-1;
 
     // move the king to the square between piece and check if there is a check
-    _board[current.x][current.y]->move(square_between);
     shared_ptr<Piece> destination_piece=_board[square_between.x][square_between.y];
-    _board[square_between.x][square_between.y]=_board[current.x][current.y];
-    _board[current.x][current.y]= destination_piece;
+    change_places(current,square_between);
     if (will_cause_check()) {
         //undo move
-        _board[square_between.x][square_between.y]->move(current);
-        _board[current.x][current.y]=_board[square_between.x][square_between.y];
-        _board[square_between.x][square_between.y]=destination_piece;
+        change_places(square_between,current,destination_piece);
         return false;
     }
     //move king to destination
-    destination_piece = _board[destination.x][destination.y];
-    _board[square_between.x][square_between.y]->move(destination);
-    _board[destination.x][destination.y]=_board[square_between.x][square_between.y];
-    _board[square_between.x][square_between.y]=destination_piece;
+    destination_piece=_board[destination.x][destination.y];
+    change_places(square_between,destination);
     if (will_cause_check()) {
-        //undo move
-        destination_piece = _board[current.x][current.y];
-        _board[destination.x][destination.y]->move(current);
-        _board[current.x][current.y]=_board[destination.x][destination.y];
-        _board[destination.x][destination.y]=destination_piece;
+        //move the king back to the starting position
+        change_places(destination,current,destination_piece);
         return false;
     }
     //move the rook to the king's side
-    destination_piece=_board[square_between.x][square_between.y];
-    Location rook_original_location=current_rook->get_location();
-    _board[current_rook->get_location().x][current_rook->get_location().y]->move(square_between);
-    _board[square_between.x][square_between.y]=_board[rook_original_location.x][rook_original_location.y];
-    _board[rook_original_location.x][rook_original_location.y]= destination_piece;
+    change_places(current_rook->get_location(),square_between);
     return true;
 }
 
@@ -450,10 +432,7 @@ bool Board::will_cause_checkmate() {
                      * Checkmate: this move clears the check and checkmates the opponent king.
                      */
                     //undo move
-                    _board[move->x][move->y]->move(starting_location);
-                    shared_ptr<Piece> destination_piece=_board[starting_location.x][starting_location.y];
-                    _board[starting_location.x][starting_location.y]=_board[move->x][move->y];
-                    _board[move->x][move->y]= destination_piece;
+                    change_places(*move,starting_location);
                     current_player = (current_player == White) ? Black : White;
                     return false;
                 }
@@ -461,4 +440,14 @@ bool Board::will_cause_checkmate() {
         }
     }
     return true;
+}
+
+void Board::change_places(const Location &current, const Location &destination,shared_ptr<Piece> destination_piece) {
+    _board[current.x][current.y]->move(destination);
+    _board[destination.x][destination.y]=_board[current.x][current.y];
+    if(destination_piece != nullptr)
+        _board[current.x][current.y]= destination_piece;
+    else
+        _board[current.x][current.y] = create_piece<Empty>('#', current);
+
 }
