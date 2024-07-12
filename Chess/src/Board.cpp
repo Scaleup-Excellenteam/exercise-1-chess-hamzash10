@@ -55,6 +55,7 @@ Board::Board(const string &board):current_player(White) {
 }
 
 int Board::move(const string &input) {
+    calculate_values(*this,current_player,1);
     //convert to locations
     Location current = {input[1] - '1',tolower(input[0]) - 'a'};
     Location destination = {input[3] - '1', tolower(input[2]) - 'a' };
@@ -81,7 +82,7 @@ int Board::check_illegal_moves(const Location& current,const Location& destinati
     //before checking if the move is legal, if the king is in check then disable the castling option
     string kings = "Kk";
     // is the piece a King, that is checked?
-    if(is_this_types(kings,current.x,current.y) && will_cause_check()){
+    if(is_this_types(kings,current.x,current.y) && !is_piece_threatened(get_current_king()->get_location()).empty()){
         //move the king back and forward to disable the castling
         _board[current.x][current.y]->move(destination);
         _board[current.x][current.y]->move(current);
@@ -118,7 +119,7 @@ int Board::check_legal_moves(const Location& current,const Location& destination
     shared_ptr<Piece> destination_piece=_board[destination.x][destination.y];
     change_places(current,destination);
     //31 - this movement will cause you checkmate
-    if (will_cause_check()) {
+    if (!is_piece_threatened(get_current_king()->get_location()).empty()) {
         //undo move
         change_places(destination,current, destination_piece);
         return WillCauseCheckmate;
@@ -127,7 +128,7 @@ int Board::check_legal_moves(const Location& current,const Location& destination
     //change player
     current_player = (current_player == White) ? Black : White;
     //41 - the last movement was legal and cause check
-    if (will_cause_check()) {
+    if (!is_piece_threatened(get_current_king()->get_location()).empty()) {
         //44 - the last move was checkmate
         if (will_cause_checkmate())
             return Checkmate;
@@ -139,45 +140,50 @@ int Board::check_legal_moves(const Location& current,const Location& destination
 }
 
 
-bool Board::will_cause_check() const {
+vector<Location> Board::is_piece_threatened(const Location& location) const {
+    //returns all threatening pieces locations
     string straight = "RQ";
     string diagonal = "BQ";
     string knights = "N";
     string pawns = "P";
-    //shared_ptr<Piece> current_king = (current_player == White) ? white_king : black_king;
-    shared_ptr<Piece> current_king =(current_player==White)? make_shared<King>(White,Location(0,4)):make_shared<King>(Black,Location(7,4));
+
+    shared_ptr<Piece> current_Piece = _board[location.x][location.y];
     if (current_player == White) {
         to_lower(straight);
         to_lower(diagonal);
         to_lower(knights);
         to_lower(pawns);
     }
-    Location current_king_location = current_king->get_location();
+    Location current_piece_location = current_Piece->get_location();
 
-    //this will store the piece is in the king's way
+    vector<Location> threats;
+
+    //this will store the pieces that is in the way
     Location piece_in_way_location{};
     vector<pair<int, int>> four_straight_threats = {
-            {current_king_location.x, BOARD_MIN_PLACE}, // above the king
-            {current_king_location.x, BOARD_MAX_PLACE-1}, // below the king
-            {BOARD_MIN_PLACE,         current_king_location.y}, // left the king
-            {BOARD_MAX_PLACE-1,         current_king_location.y}  // right the king
+            {current_piece_location.x, BOARD_MIN_PLACE}, // above the king
+            {current_piece_location.x, BOARD_MAX_PLACE-1}, // below the king
+            {BOARD_MIN_PLACE,         current_piece_location.y}, // left the king
+            {BOARD_MAX_PLACE-1,         current_piece_location.y}  // right the king
     };
 
+    //for each straight direction
     for (auto direction: four_straight_threats) {
-        piece_in_way_location = is_way_clear(current_king_location, Location(direction.first, direction.second));
+        piece_in_way_location = is_way_clear(current_piece_location, Location(direction.first, direction.second));
         if (piece_in_way_location != CLEAR && is_this_types(straight,piece_in_way_location.x,piece_in_way_location.y))
-            return true;
+            //return true;
+            threats.push_back(piece_in_way_location);
     }
 
     //this helper lambda function will check the diagonal directions
     auto check_diagonal_threat = [&](int x_dir, int y_dir, bool check_pawn) {
-        int x = current_king_location.x;
-        int y = current_king_location.y;
+        int x = current_piece_location.x;
+        int y = current_piece_location.y;
         while (x >= BOARD_MIN_PLACE && x <= BOARD_MAX_PLACE && y >= BOARD_MIN_PLACE && y <= BOARD_MAX_PLACE) {
             x += x_dir;
             y += y_dir;
         }
-        piece_in_way_location = is_way_clear(current_king_location, Location(x, y));
+        piece_in_way_location = is_way_clear(current_piece_location, Location(x, y));
         // pawn check only for the black king
         if (piece_in_way_location != CLEAR && is_this_types(diagonal,piece_in_way_location.x,piece_in_way_location.y))
             return true;
@@ -186,24 +192,29 @@ bool Board::will_cause_check() const {
         return false;
     };
 
+    //TODO make it simpler
     // check north-west the king
-    if (check_diagonal_threat(-1, -1,(current_king->get_color() == Black) &&
-                                       (piece_in_way_location.x == current_king_location.x - 1) &&
-                                       (piece_in_way_location.y == current_king_location.y - 1))) return true;
-    //check north-east the king
-    if (check_diagonal_threat(+1, -1, (current_king->get_color() == Black) &&
-                                      (piece_in_way_location.x == current_king_location.x + 1) &&
-                                      (piece_in_way_location.y == current_king_location.y - 1))) return true;
-    //check south-west the king
-    if (check_diagonal_threat(-1, +1, (current_king->get_color() == White) &&
-                                      (piece_in_way_location.x == current_king_location.x - 1) &&
-                                      (piece_in_way_location.y == current_king_location.y + 1))) return true;
-    //check south-east the king
-    if (check_diagonal_threat(+1, +1, (current_king->get_color() == White) &&
-                                      (piece_in_way_location.x == current_king_location.x + 1) &&
-                                      (piece_in_way_location.y == current_king_location.y + 1))) return true;
+    if (check_diagonal_threat(-1, -1,(current_Piece->get_color() == Black) &&
+                                       (piece_in_way_location.x == current_piece_location.x - 1) &&
+                                       (piece_in_way_location.y == current_piece_location.y - 1)))
+        threats.push_back(piece_in_way_location);
+    //check north-east the piece
+    if (check_diagonal_threat(+1, -1, (current_Piece->get_color() == Black) &&
+                                      (piece_in_way_location.x == current_piece_location.x + 1) &&
+                                      (piece_in_way_location.y == current_piece_location.y - 1)))
+        threats.push_back(piece_in_way_location);
+    //check south-west the piece
+    if (check_diagonal_threat(-1, +1, (current_Piece->get_color() == White) &&
+                                      (piece_in_way_location.x == current_piece_location.x - 1) &&
+                                      (piece_in_way_location.y == current_piece_location.y + 1)))
+        threats.push_back(piece_in_way_location);
+    //check south-east the piece
+    if (check_diagonal_threat(+1, +1, (current_Piece->get_color() == White) &&
+                                      (piece_in_way_location.x == current_piece_location.x + 1) &&
+                                      (piece_in_way_location.y == current_piece_location.y + 1)))
+        threats.push_back(piece_in_way_location);
 
-    //check for knight checks
+    //check for knights
     vector<pair<int, int>> possible_locations = {
             {-2, -1},
             {-2, +1},
@@ -217,17 +228,17 @@ bool Board::will_cause_check() const {
 
     for (auto pl: possible_locations) {
         //check if the move in the board
-        if (current_king_location.y + pl.first >= BOARD_MIN_PLACE &&
-            current_king_location.y + pl.first < BOARD_MAX_PLACE &&
-            current_king_location.x + pl.second >= BOARD_MIN_PLACE &&
-            current_king_location.x + pl.second < BOARD_MAX_PLACE)
+        if (current_piece_location.y + pl.first >= BOARD_MIN_PLACE &&
+            current_piece_location.y + pl.first < BOARD_MAX_PLACE &&
+            current_piece_location.x + pl.second >= BOARD_MIN_PLACE &&
+            current_piece_location.x + pl.second < BOARD_MAX_PLACE)
             //check for an opponent knight
-            if (is_this_types(knights,current_king_location.x + pl.second,current_king_location.y + pl.first))
-                return true;
+            if (is_this_types(knights,current_piece_location.x + pl.second,current_piece_location.y + pl.first))
+                threats.push_back(piece_in_way_location);
 
     }
 
-    return false;
+    return threats;
 }
 
 void Board::to_lower(string &str) const {
@@ -287,7 +298,7 @@ bool Board::will_preform_castling(const Location &current, const Location &desti
         return false;
 
     //check if this is the first move of the king and the rook
-    shared_ptr<Piece> current_king=(current_player==White)? white_king:black_king;
+    shared_ptr<Piece> current_king=get_current_king();
     shared_ptr<Piece> current_rook=_board[rook_x_place][destination.y];
     if(!dynamic_pointer_cast<King>(current_king)->is_first_move() || !dynamic_pointer_cast<Rook>(current_rook)->is_first_move())
         return false;
@@ -303,7 +314,7 @@ bool Board::will_preform_castling(const Location &current, const Location &desti
     // move the king to the square between piece and check if there is a check
     shared_ptr<Piece> destination_piece=_board[square_between.x][square_between.y];
     change_places(current,square_between);
-    if (will_cause_check()) {
+    if (!is_piece_threatened(get_current_king()->get_location()).empty()) {
         //undo move
         change_places(square_between,current,destination_piece);
         return false;
@@ -311,7 +322,7 @@ bool Board::will_preform_castling(const Location &current, const Location &desti
     //move king to destination
     destination_piece=_board[destination.x][destination.y];
     change_places(square_between,destination);
-    if (will_cause_check()) {
+    if (!is_piece_threatened(get_current_king()->get_location()).empty()) {
         //move the king back to the starting position
         change_places(destination,current,destination_piece);
         return false;
@@ -499,8 +510,8 @@ pair<vector<pair<Location,Location>>,int> Board::calculate_values(Board board, P
                     int current_route_value = 0;
                     vector<pair<Location,Location>> current_route = {{starting_location, destination}};
                     //add the value of the move
-                    current_route_value += threatened_by_weaker_piece(board,starting_location,destination);
-                    current_route_value += threatening_stronger_piece(board,starting_location,destination);
+                    current_route_value += threatened_by_weaker_piece(board,destination);
+                    current_route_value += threatening_stronger_piece(board,destination);
                     current_route_value += eaten_piece_value;
 
                     //subtract the opponent counter move value
@@ -523,15 +534,23 @@ pair<vector<pair<Location,Location>>,int> Board::calculate_values(Board board, P
     return {best_route, best_route_value};
 }
 
-int Board::threatened_by_weaker_piece(const Board& board,const Location &location ,const Location &destination) {
-    return Threatened;
+int Board::threatened_by_weaker_piece(const Board& board,const Location &location) {
+    //check if the piece is threatened by a weaker opponent's piece
+    auto current_piece_value=board.get_piece_value(location);
+    //get all the pieces that is threatening the current piece
+    auto threatening_pieces= board.is_piece_threatened(location);
+    //check if any threatening piece value is lower than the current piece
+    for(auto threat_location:threatening_pieces)
+        if(current_piece_value > board.get_piece_value(threat_location))
+            return Threatened;
+    return 0;
 }
 
-int Board::threatening_stronger_piece(const Board& board,const Location &location ,const Location &destination) {
+int Board::threatening_stronger_piece(const Board& board,const Location &location) {
     return Threatening;
 }
 
-int Board::get_piece_value(const Location &location) {
+int Board::get_piece_value(const Location &location) const {
     char piece = _board[location.x][location.y]->get_type();
     switch(tolower(piece)){
         case '#':
@@ -549,5 +568,9 @@ int Board::get_piece_value(const Location &location) {
         case 'p':
             return PawnValue;
     }
+}
+
+shared_ptr<Piece> Board::get_current_king() const {
+    return (current_player==White)? white_king:black_king;
 }
 

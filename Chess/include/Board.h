@@ -49,8 +49,8 @@ class Board {
     //functions
     int check_illegal_moves(const Location& current,const Location& destination) const;
     int check_legal_moves(const Location& current,const Location& destination);
-    bool will_cause_check() const;
-
+    vector<Location> is_piece_threatened(const Location& location) const;
+    shared_ptr<Piece> get_current_king() const;
     void to_lower(string& str) const;
     Player get_player_color(const char& ch);
     template<class PieceType>
@@ -62,9 +62,9 @@ class Board {
     void change_places(const Location& current,const Location& destination,shared_ptr<Piece> destination_piece= nullptr);
     vector<shared_ptr<Piece>> get_all_pieces_of_player(Player player) const;
     pair<vector<pair<Location,Location>>,int> calculate_values(Board board, Player current_player, const int& depth);
-    int threatened_by_weaker_piece(const Board& board,const Location &location ,const Location &destination);
-    int threatening_stronger_piece(const Board& board,const Location &location ,const Location &destination);
-    int get_piece_value( const Location& location);
+    int threatened_by_weaker_piece(const Board& board,const Location &location);
+    int threatening_stronger_piece(const Board& board,const Location &location);
+    int get_piece_value( const Location& location) const;
 public:
     explicit Board(const string &board = "RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr");
     int move(const string &input);
