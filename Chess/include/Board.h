@@ -61,7 +61,7 @@ class Board {
     bool will_cause_checkmate();
     void change_places(const Location& current,const Location& destination,shared_ptr<Piece> destination_piece= nullptr);
     vector<shared_ptr<Piece>> get_all_pieces_of_player(Player player) const;
-    pair<vector<Location>,int> calculate_values(Board board, Player current_player, const int& depth);
+    pair<vector<pair<Location,Location>>,int> calculate_values(Board board, Player current_player, const int& depth);
     int threatened_by_weaker_piece(const Board& board,const Location &location ,const Location &destination);
     int threatening_stronger_piece(const Board& board,const Location &location ,const Location &destination);
     int get_piece_value( const Location& location);

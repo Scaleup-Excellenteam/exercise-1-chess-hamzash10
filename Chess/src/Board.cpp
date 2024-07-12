@@ -55,7 +55,6 @@ Board::Board(const string &board):current_player(White) {
 }
 
 int Board::move(const string &input) {
-    calculate_values(*this,current_player,1);
     //convert to locations
     Location current = {input[1] - '1',tolower(input[0]) - 'a'};
     Location destination = {input[3] - '1', tolower(input[2]) - 'a' };
@@ -462,9 +461,9 @@ vector<shared_ptr<Piece>> Board::get_all_pieces_of_player(Player player) const {
 
 
 // ----------Algorithm--------------
-pair<vector<Location>,int> Board::calculate_values(Board board, Player current_player_color, const int &depth) {
+pair<vector<pair<Location,Location>>,int> Board::calculate_values(Board board, Player current_player_color, const int &depth) {
     if(depth<0)
-        return {vector<Location>(),0};
+        return {vector<pair<Location,Location>>({{CLEAR,CLEAR}}),0};
 
     //get all the pieces
     vector<shared_ptr<Piece>> player_pieces = board.get_all_pieces_of_player(current_player_color);
@@ -473,7 +472,7 @@ pair<vector<Location>,int> Board::calculate_values(Board board, Player current_p
     // opponent
     Player opponent_player= (current_player_color==White)? Black:White;
 
-    vector<Location> best_route;
+    vector<pair<Location,Location>> best_route;
     int best_route_value = INT_MIN;
 
     //iterate through the pieces
@@ -498,7 +497,7 @@ pair<vector<Location>,int> Board::calculate_values(Board board, Player current_p
                 board.current_player=(board.current_player == White)? Black:White;
                 if(response==LegalNextTurn || response==LegalCheck || response== Checkmate) {
                     int current_route_value = 0;
-                    vector<Location> current_route = {starting_location};
+                    vector<pair<Location,Location>> current_route = {{starting_location, destination}};
                     //add the value of the move
                     current_route_value += threatened_by_weaker_piece(board,starting_location,destination);
                     current_route_value += threatening_stronger_piece(board,starting_location,destination);
@@ -510,7 +509,8 @@ pair<vector<Location>,int> Board::calculate_values(Board board, Player current_p
                     //undo move
                     board.change_places(destination, starting_location);
 
-                    current_route.insert(current_route.end(),rest_route.first.begin(),rest_route.first.end());
+                    if(rest_route.first.front().first!=CLEAR)
+                        current_route.insert(current_route.end(),rest_route.first.begin(),rest_route.first.end());
 
                     if (current_route_value > best_route_value) {
                         best_route = current_route;
