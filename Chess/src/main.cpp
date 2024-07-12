@@ -12,7 +12,7 @@ int main()
                    "########"
                    "pppppppp"
                    "rnbqkbnr";
-    string board = "RNBQ#K#R"
+    //string board = "RNBQ#K#R"
                    "PPPP###q"
                    "####PP##"
                    "######P#"
@@ -20,7 +20,14 @@ int main()
                    "####p###"
                    "pppp#ppp"
                    "rnb#kbnr";
-    //string board = "R###K##RPPPPPPPP################################ppppppppr###k##r";
+   string board = "########"
+                  "####P###"
+                  "########"
+                  "########"
+                  "########"
+                  "########"
+                  "####p###"
+                  "########";
     //string board = "RNBQKBNR################################################rnbqkbnr";
 	Chess a(board);
     shared_ptr<Board> engine_board(make_shared<Board>(board));

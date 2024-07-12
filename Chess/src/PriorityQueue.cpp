@@ -3,7 +3,3 @@
 //
 
 #include "../include/PriorityQueue.h"
-
-int MyComparator::operator()(int a, int b) const {
-    return a-b;
-}

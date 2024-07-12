@@ -7,10 +7,12 @@
 
 #include <array>
 #include "Piece.h"
+#include "../include/PriorityQueue.h"
 using namespace std;
 
 
 const Location CLEAR(-1,-1);
+const int DEPTH=2;
 enum Response{
     // Illegal movements
     NoPieceAtSource = 11,
@@ -25,14 +27,27 @@ enum Response{
     Castling = 43,
     Checkmate = 44
 };
+
+enum Values{
+    PawnValue=1,
+    KnightValue=3,
+    BishopValue=3,
+    RookValue=5,
+    QueenValue=9,
+    KingValue=100,
+    Threatened=-2, // threatened by weaker piece
+    Threatening=2 // threatening a stronger piece
+};
+
+
 class Board {
     array<array<shared_ptr<Piece>, 8>, 8> _board;
     shared_ptr<Piece> white_king, black_king;
     Player current_player;
-
+    PriorityQueue<pair<vector<Location>,int>> best_moves;
 
     //functions
-    int check_illegal_moves(const Location& current,const Location& destination);
+    int check_illegal_moves(const Location& current,const Location& destination) const;
     int check_legal_moves(const Location& current,const Location& destination);
     bool will_cause_check() const;
 
@@ -45,11 +60,14 @@ class Board {
     bool is_this_types(const string& types,const int& x,const int& y) const;
     bool will_cause_checkmate();
     void change_places(const Location& current,const Location& destination,shared_ptr<Piece> destination_piece= nullptr);
+    vector<shared_ptr<Piece>> get_all_pieces_of_player(Player player) const;
+    pair<vector<Location>,int> calculate_values(Board board, Player current_player, const int& depth);
+    int threatened_by_weaker_piece(const Board& board,const Location &location ,const Location &destination);
+    int threatening_stronger_piece(const Board& board,const Location &location ,const Location &destination);
+    int get_piece_value( const Location& location);
 public:
     explicit Board(const string &board = "RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr");
-
     int move(const string &input);
 };
-
 
 #endif //CHESS_BOARD_H
