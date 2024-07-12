@@ -10,12 +10,12 @@
 #include <algorithm>
 using namespace std;
 
-
 template<typename T>
 struct MyComparator {
-    int operator()(const pair<vector<Location>, int>& a, const pair<vector<Location>, int>& b) const;
+    bool operator()(const pair<vector<pair<Location, Location>>, int>& a, const pair<vector<pair<Location, Location>>, int>& b) const {
+        return a.second - b.second;
+    }
 };
-
 
 template<typename T, typename Comparator = MyComparator<T>>
 class PriorityQueue {
@@ -27,10 +27,6 @@ public:
 };
 
 
-template<typename T>
-int MyComparator<T>::operator()(const pair<vector<Location>, int> &a, const pair<vector<Location>, int> &b) const  {
-    return a.second - b.second;
-}
 
 template<typename T, typename Comparator>
 T PriorityQueue<T, Comparator>::pull() {
