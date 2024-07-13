@@ -44,7 +44,7 @@ class Board {
     array<array<shared_ptr<Piece>, 8>, 8> _board;
     shared_ptr<Piece> white_king, black_king;
     Player current_player;
-    PriorityQueue<pair<vector<Location>,int>> best_moves;
+    PriorityQueue<pair<vector<pair<Location,Location>>,int>> best_moves;
 
     //functions
     int check_illegal_moves(const Location& current,const Location& destination) const;
@@ -62,12 +62,13 @@ class Board {
     void change_places(const Location& current,const Location& destination,shared_ptr<Piece> destination_piece= nullptr);
     vector<shared_ptr<Piece>> get_all_pieces_of_player(Player player) const;
     pair<vector<pair<Location,Location>>,int> calculate_values(Board board, Player current_player, const int& depth);
-    int threatened_by_weaker_piece(const Board& board,const Location &location);
-    int threatening_stronger_piece(const Board& board,const Location &location);
+    int threatened_by_weaker_piece(const Location &location);
+    int threatening_stronger_piece(const Location &location);
     int get_piece_value( const Location& location) const;
 public:
     explicit Board(const string &board = "RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr");
     int move(const string &input);
+    friend ostream& operator<<(ostream& os, Board& board);
 };
 
 #endif //CHESS_BOARD_H

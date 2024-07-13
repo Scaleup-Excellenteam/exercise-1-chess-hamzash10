@@ -55,7 +55,6 @@ Board::Board(const string &board):current_player(White) {
 }
 
 int Board::move(const string &input) {
-    calculate_values(*this,current_player,1);
     //convert to locations
     Location current = {input[1] - '1',tolower(input[0]) - 'a'};
     Location destination = {input[3] - '1', tolower(input[2]) - 'a' };
@@ -148,6 +147,9 @@ vector<Location> Board::is_piece_threatened(const Location& location) const {
     string pawns = "P";
 
     shared_ptr<Piece> current_Piece = _board[location.x][location.y];
+    //Todo: delete
+    if(location.x==4 && (location.y==0 || location.y ==7))
+        current_Piece=get_current_king();
     if (current_player == White) {
         to_lower(straight);
         to_lower(diagonal);
@@ -484,7 +486,7 @@ pair<vector<pair<Location,Location>>,int> Board::calculate_values(Board board, P
     Player opponent_player= (current_player_color==White)? Black:White;
 
     vector<pair<Location,Location>> best_route;
-    int best_route_value = INT_MIN;
+    int best_route_value = 0;
 
     //iterate through the pieces
     for(auto piece:player_pieces){
@@ -510,8 +512,8 @@ pair<vector<pair<Location,Location>>,int> Board::calculate_values(Board board, P
                     int current_route_value = 0;
                     vector<pair<Location,Location>> current_route = {{starting_location, destination}};
                     //add the value of the move
-                    current_route_value += threatened_by_weaker_piece(board,destination);
-                    current_route_value += threatening_stronger_piece(board,destination);
+                    current_route_value += board.threatened_by_weaker_piece(destination);
+                    current_route_value += board.threatening_stronger_piece(destination);
                     current_route_value += eaten_piece_value;
 
                     //subtract the opponent counter move value
@@ -520,12 +522,22 @@ pair<vector<pair<Location,Location>>,int> Board::calculate_values(Board board, P
                     //undo move
                     board.change_places(destination, starting_location);
 
-                    if(rest_route.first.front().first!=CLEAR)
+                    bool good_route= true;
+                    auto it=rest_route.first.begin();
+                    while(it!=rest_route.first.end()){
+                        if(it->first==CLEAR || it->second==CLEAR) {
+                            good_route = false;
+                            break;
+                        }
+                        it++;
+                    }
+                    if(good_route)
                         current_route.insert(current_route.end(),rest_route.first.begin(),rest_route.first.end());
 
-                    if (current_route_value > best_route_value) {
+                    if (current_route_value >= best_route_value) {
                         best_route = current_route;
                         best_route_value = current_route_value;
+                        best_moves.push({best_route,best_route_value});
                     }
                 }
             }
@@ -534,20 +546,41 @@ pair<vector<pair<Location,Location>>,int> Board::calculate_values(Board board, P
     return {best_route, best_route_value};
 }
 
-int Board::threatened_by_weaker_piece(const Board& board,const Location &location) {
+int Board::threatened_by_weaker_piece(const Location &location) {
     //check if the piece is threatened by a weaker opponent's piece
-    auto current_piece_value=board.get_piece_value(location);
+    auto current_piece_value=get_piece_value(location);
     //get all the pieces that is threatening the current piece
-    auto threatening_pieces= board.is_piece_threatened(location);
+    auto threatening_pieces= is_piece_threatened(location);
     //check if any threatening piece value is lower than the current piece
     for(auto threat_location:threatening_pieces)
-        if(current_piece_value > board.get_piece_value(threat_location))
+        if(current_piece_value > get_piece_value(threat_location))
             return Threatened;
     return 0;
 }
 
-int Board::threatening_stronger_piece(const Board& board,const Location &location) {
-    return Threatening;
+int Board::threatening_stronger_piece(const Location &location) {
+    /*
+     * the function runs through all the opponent pieces and using previous functions checks if the piece is threatened by the move
+     */
+    auto player=current_player;
+    auto current_piece_value=get_piece_value(location);
+    auto opponent=(player==White)? Black:White;
+    current_player=opponent;
+    //get all the pieces of the opponent
+    auto opponent_pieces=get_all_pieces_of_player(opponent);
+    for(auto piece:opponent_pieces){
+        //check if the opponent piece is threatened by the move
+        auto threats=is_piece_threatened(piece->get_location());
+        auto it= find(threats.begin(),threats.end(),location);
+        if(it != threats.end()) {
+            if(current_piece_value < get_piece_value(*it)) {
+                current_player = player;
+                return Threatening;
+            }
+        }
+    }
+    current_player=player;
+    return 0;
 }
 
 int Board::get_piece_value(const Location &location) const {
@@ -571,6 +604,21 @@ int Board::get_piece_value(const Location &location) const {
 }
 
 shared_ptr<Piece> Board::get_current_king() const {
-    return (current_player==White)? white_king:black_king;
+    //return (current_player==White)? white_king:black_king;
+    return (current_player==White)? make_shared<King>(White,Location(4,0)):make_shared<King>(Black,Location(4,7));
 }
 
+
+ostream& operator<<(ostream& os,Board& board) {
+    board.calculate_values(board,board.current_player,2);
+    if (!board.best_moves.empty()) {
+        auto best_move = board.best_moves.pull().first;
+        os << "Recommended move: " << best_move.front().first;
+        best_move.pop_back();
+        os << " " << best_move.front().second;
+    } else {
+        os << "No recommended move available.";
+    }
+    board.best_moves.clear();
+    return os;
+}

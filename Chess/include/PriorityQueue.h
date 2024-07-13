@@ -12,7 +12,7 @@ using namespace std;
 
 template<typename T>
 struct MyComparator {
-    bool operator()(const pair<vector<pair<Location, Location>>, int>& a, const pair<vector<pair<Location, Location>>, int>& b) const {
+    bool operator()(const T& a, const T& b) const {
         return a.second - b.second;
     }
 };
@@ -23,25 +23,38 @@ class PriorityQueue {
     Comparator comp;
 public:
     void push(const T& value);
-    T pull();
+    T pull() const;
+    const void clear();
+    bool empty() const;
+
 };
 
+template<typename T, typename Comparator>
+const void PriorityQueue<T, Comparator>::clear() {
+    queue.clear();
+}
+
+template<typename T, typename Comparator>
+bool PriorityQueue<T, Comparator>::empty() const {
+    return queue.empty();
+}
 
 
 template<typename T, typename Comparator>
-T PriorityQueue<T, Comparator>::pull() {
+T PriorityQueue<T, Comparator>::pull() const {
     T value = queue.front();
-    queue.pop_front();
     return value;
 }
 
 template<typename T, typename Comparator>
 void PriorityQueue<T, Comparator>::push(const T &value) {
+    // add the path only if it contains three moves overall
     auto it = queue.begin();
     while (it != queue.end() && comp(value, *it)) {
         ++it;
     }
     queue.insert(it, value);
+
 }
 
 #endif //CHESS_PRIORITYQUEUE_H

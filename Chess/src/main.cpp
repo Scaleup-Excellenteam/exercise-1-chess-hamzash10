@@ -53,6 +53,7 @@ int main()
 
 		/**/ 
 		{ // put your code here instead that code
+            cout<<*engine_board<<endl;
             codeResponse=engine_board->move(res);
 		}
 		/**/

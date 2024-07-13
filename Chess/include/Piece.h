@@ -19,8 +19,12 @@ struct Location{
     bool operator!=(const Location& rhs) {
         return x!=rhs.x | y!=rhs.y;
     }
+    bool operator==(const Location& other) const {
+        return x == other.x && y == other.y;
+    }
 };
 
+ostream& operator<<(std::ostream& os, const Location& loc);
 
 
 enum Player{
