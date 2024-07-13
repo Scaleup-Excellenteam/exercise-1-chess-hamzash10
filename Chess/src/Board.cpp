@@ -147,9 +147,6 @@ vector<Location> Board::is_piece_threatened(const Location& location) const {
     string pawns = "P";
 
     shared_ptr<Piece> current_Piece = _board[location.x][location.y];
-    //Todo: delete
-    if(location.x==4 && (location.y==0 || location.y ==7))
-        current_Piece=get_current_king();
     if (current_player == White) {
         to_lower(straight);
         to_lower(diagonal);
@@ -217,7 +214,7 @@ vector<Location> Board::is_piece_threatened(const Location& location) const {
         threats.push_back(piece_in_way_location);
 
     //check for knights
-    vector<pair<int, int>> possible_locations = {
+    vector<Location> possible_locations = {
             {-2, -1},
             {-2, +1},
             {-1, +2},
@@ -230,13 +227,13 @@ vector<Location> Board::is_piece_threatened(const Location& location) const {
 
     for (auto pl: possible_locations) {
         //check if the move in the board
-        if (current_piece_location.y + pl.first >= BOARD_MIN_PLACE &&
-            current_piece_location.y + pl.first < BOARD_MAX_PLACE &&
-            current_piece_location.x + pl.second >= BOARD_MIN_PLACE &&
-            current_piece_location.x + pl.second < BOARD_MAX_PLACE)
+        if (current_piece_location.y + pl.y >= BOARD_MIN_PLACE &&
+            current_piece_location.y + pl.y < BOARD_MAX_PLACE &&
+            current_piece_location.x + pl.x >= BOARD_MIN_PLACE &&
+            current_piece_location.x + pl.x < BOARD_MAX_PLACE)
             //check for an opponent knight
-            if (is_this_types(knights,current_piece_location.x + pl.second,current_piece_location.y + pl.first))
-                threats.push_back(piece_in_way_location);
+            if (is_this_types(knights,current_piece_location.x + pl.x,current_piece_location.y + pl.y))
+                threats.push_back({current_piece_location.x + pl.x, current_piece_location.y + pl.y});
 
     }
 
@@ -486,11 +483,10 @@ pair<vector<pair<Location,Location>>,int> Board::calculate_values(Board board, P
     Player opponent_player= (current_player_color==White)? Black:White;
 
     vector<pair<Location,Location>> best_route;
-    int best_route_value = 0;
+    int best_route_value = INT_MIN;
 
     //iterate through the pieces
     for(auto piece:player_pieces){
-
         // add the starting location to the beginning of the route
         auto starting_location = piece->get_location();
         //iterate through the moves of each piece
@@ -506,34 +502,35 @@ pair<vector<pair<Location,Location>>,int> Board::calculate_values(Board board, P
 
                 //simulate the move
                 response = board.check_legal_moves(piece->get_location(), destination);
-                //the function above changes the player color so I reversed it
-                board.current_player=(board.current_player == White)? Black:White;
                 if(response==LegalNextTurn || response==LegalCheck || response== Checkmate) {
                     int current_route_value = 0;
                     vector<pair<Location,Location>> current_route = {{starting_location, destination}};
                     //add the value of the move
+                    //the function check_legal_moves() changes the player color, so I reversed it
+                    board.current_player=(board.current_player == White)? Black:White;
                     current_route_value += board.threatened_by_weaker_piece(destination);
                     current_route_value += board.threatening_stronger_piece(destination);
                     current_route_value += eaten_piece_value;
 
+                    //checking the opponent move
+                    board.current_player=(board.current_player == White)? Black:White;
                     //subtract the opponent counter move value
                     auto rest_route=calculate_values(board,opponent_player,depth-1);
+                    board.current_player=(board.current_player == White)? Black:White;
                     current_route_value -= rest_route.second;
                     //undo move
                     board.change_places(destination, starting_location);
 
-                    bool good_route= true;
+                    int good_route= 0;
                     auto it=rest_route.first.begin();
                     while(it!=rest_route.first.end()){
                         if(it->first==CLEAR || it->second==CLEAR) {
-                            good_route = false;
+                            good_route = 1;
                             break;
                         }
                         it++;
                     }
-                    if(good_route)
-                        current_route.insert(current_route.end(),rest_route.first.begin(),rest_route.first.end());
-
+                    current_route.insert(current_route.end(),rest_route.first.begin(),rest_route.first.end()-good_route);
                     if (current_route_value >= best_route_value) {
                         best_route = current_route;
                         best_route_value = current_route_value;
@@ -553,8 +550,8 @@ int Board::threatened_by_weaker_piece(const Location &location) {
     auto threatening_pieces= is_piece_threatened(location);
     //check if any threatening piece value is lower than the current piece
     for(auto threat_location:threatening_pieces)
-        if(current_piece_value > get_piece_value(threat_location))
-            return Threatened;
+        if (current_piece_value > get_piece_value(threat_location))
+            return -current_piece_value;
     return 0;
 }
 
@@ -562,24 +559,26 @@ int Board::threatening_stronger_piece(const Location &location) {
     /*
      * the function runs through all the opponent pieces and using previous functions checks if the piece is threatened by the move
      */
-    auto player=current_player;
     auto current_piece_value=get_piece_value(location);
+    auto player=(current_player==White)? Black:White;
     auto opponent=(player==White)? Black:White;
-    current_player=opponent;
+    current_player=player;
     //get all the pieces of the opponent
     auto opponent_pieces=get_all_pieces_of_player(opponent);
     for(auto piece:opponent_pieces){
         //check if the opponent piece is threatened by the move
+        current_player=opponent;
         auto threats=is_piece_threatened(piece->get_location());
+        current_player=player;
         auto it= find(threats.begin(),threats.end(),location);
         if(it != threats.end()) {
             if(current_piece_value < get_piece_value(*it)) {
-                current_player = player;
-                return Threatening;
+                current_player=opponent;
+                return get_piece_value(*it);
             }
         }
     }
-    current_player=player;
+    current_player=opponent;
     return 0;
 }
 
@@ -600,12 +599,12 @@ int Board::get_piece_value(const Location &location) const {
             return BishopValue;
         case 'p':
             return PawnValue;
+
     }
 }
 
 shared_ptr<Piece> Board::get_current_king() const {
-    //return (current_player==White)? white_king:black_king;
-    return (current_player==White)? make_shared<King>(White,Location(4,0)):make_shared<King>(Black,Location(4,7));
+    return (current_player==White)? white_king:black_king;
 }
 
 

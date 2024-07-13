@@ -108,6 +108,7 @@ void Chess::displayBoard() const
 {
 	clear();
 	show();
+    cout<<move<<endl;
 	cout << m_msg<< m_errorMsg;
 	
 }
@@ -245,7 +246,7 @@ void Chess::doTurn()
 
 // C'tor
 Chess::Chess(const string& start)
-	: m_boardString(start),m_codeResponse(-1)
+	: m_boardString(start),m_codeResponse(-1),move(Move::getInstance())
 {
 	setFrames();
 	setPieces();

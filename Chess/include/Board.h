@@ -11,6 +11,7 @@
 using namespace std;
 
 
+class Move;
 const Location CLEAR(-1,-1);
 const int DEPTH=2;
 enum Response{
@@ -69,6 +70,7 @@ public:
     explicit Board(const string &board = "RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr");
     int move(const string &input);
     friend ostream& operator<<(ostream& os, Board& board);
+    friend class Move;
 };
 
 #endif //CHESS_BOARD_H

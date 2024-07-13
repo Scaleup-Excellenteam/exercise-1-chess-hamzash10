@@ -38,6 +38,7 @@ add_executable (Chess ""
         src/Pawn.cpp
         include/PriorityQueue.h
         src/PriorityQueue.cpp
+        src/Move.cpp
 )
 
 

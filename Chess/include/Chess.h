@@ -2,6 +2,7 @@
 #include <iostream>
 #include <Windows.h>
 #include <string>
+#include "Move.h"
 
 using std::cout;
 using std::cin; 
@@ -18,6 +19,7 @@ class Chess {
 	string m_msg = "\n";
 	string m_errorMsg = "\n";
 	int m_codeResponse;
+    Move& move;
 
 	void clear() const;
 	void setFrames();

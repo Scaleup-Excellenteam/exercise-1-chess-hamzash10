@@ -26,7 +26,7 @@ struct Location{
 
 ostream& operator<<(std::ostream& os, const Location& loc);
 
-
+static int call=0;
 enum Player{
     White,
     Black,

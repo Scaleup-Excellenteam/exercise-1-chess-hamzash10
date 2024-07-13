@@ -12,15 +12,15 @@ int main()
                    "########"
                    "pppppppp"
                    "rnbqkbnr";
-    //string board = "RNBQ#K#R"
-                   "PPPP###q"
-                   "####PP##"
+    string board = "RNBQKBNR"
+                   "PPPPPP#P"
+                   "########"
                    "######P#"
                    "########"
                    "####p###"
                    "pppp#ppp"
-                   "rnb#kbnr";
-   string board = "########"
+                   "rnbqkbnr";
+   //string board = "########"
                   "####P###"
                   "########"
                   "########"
@@ -29,8 +29,9 @@ int main()
                   "####p###"
                   "########";
     //string board = "RNBQKBNR################################################rnbqkbnr";
-	Chess a(board);
     shared_ptr<Board> engine_board(make_shared<Board>(board));
+    Move& move = Move::getInstance(*engine_board);
+	Chess a(board);
     int codeResponse = 0;
 	string res = a.getInput();
 	while (res != "exit")
@@ -53,7 +54,6 @@ int main()
 
 		/**/ 
 		{ // put your code here instead that code
-            cout<<*engine_board<<endl;
             codeResponse=engine_board->move(res);
 		}
 		/**/
