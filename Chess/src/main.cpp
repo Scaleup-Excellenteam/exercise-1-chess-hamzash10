@@ -1,7 +1,7 @@
 // Chess 
 #include "../include/Chess.h"
 #include "../include/Board.h"
-
+#include "../include/Myexceptions.h"
 int main()
 {
     //string board = "RNBQKBNR"
@@ -31,6 +31,8 @@ int main()
     //string board = "RNBQKBNR################################################rnbqkbnr";
     shared_ptr<Board> engine_board(make_shared<Board>(board));
     Move& move = Move::getInstance(*engine_board);
+    IllegalMoveException::getInstance("");
+    BoardStateException::getInstance("");
 	Chess a(board);
     int codeResponse = 0;
 	string res = a.getInput();
@@ -54,6 +56,9 @@ int main()
 
 		/**/ 
 		{ // put your code here instead that code
+            // clear the previous exception
+            IllegalMoveException::getInstance("");
+            BoardStateException::getInstance("");
             codeResponse=engine_board->move(res);
 		}
 		/**/

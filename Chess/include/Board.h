@@ -8,6 +8,7 @@
 #include <array>
 #include "Piece.h"
 #include "../include/PriorityQueue.h"
+#include "Myexceptions.h"
 using namespace std;
 
 
@@ -54,6 +55,7 @@ class Board {
     shared_ptr<Piece> get_current_king() const;
     void to_lower(string& str) const;
     Player get_player_color(const char& ch);
+    bool is_valid_location(const Location& location);
     template<class PieceType>
     shared_ptr<PieceType> create_piece(const char& ch, Location starting_location);
     bool will_preform_castling(const Location& current,const Location& destination);

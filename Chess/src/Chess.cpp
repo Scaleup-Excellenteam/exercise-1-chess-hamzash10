@@ -110,7 +110,8 @@ void Chess::displayBoard() const
 	show();
     cout<<move<<endl;
 	cout << m_msg<< m_errorMsg;
-	
+	cout<<IllegalMoveException::getInstance()->what();
+    cout<<BoardStateException::getInstance()->what();
 }
 // print the who is turn before getting input 
 void Chess::showAskInput() const 

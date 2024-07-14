@@ -55,13 +55,24 @@ Board::Board(const string &board):current_player(White) {
 }
 
 int Board::move(const string &input) {
+    int response;
+    Location current;
+    Location destination;
     //convert to locations
-    Location current = {input[1] - '1',tolower(input[0]) - 'a'};
-    Location destination = {input[3] - '1', tolower(input[2]) - 'a' };
 
-    int response=check_illegal_moves(current,destination);
-    if(!response)
-        response= check_legal_moves(current,destination);
+    current = {input[1] - '1', tolower(input[0]) - 'a'};
+    destination = {input[3] - '1', tolower(input[2]) - 'a'};
+    if(!is_valid_location(current) || !is_valid_location(destination))
+        BoardStateException::getInstance("location or destination is not on the board: "+input + "\n");
+    response = check_illegal_moves(current, destination);
+    if (!response) {
+        response = check_legal_moves(current, destination);
+        if(response == WillCauseCheckmate)
+            IllegalMoveException::getInstance("illegal move, error code: " + to_string(response) + "\n");
+    }
+    else
+        IllegalMoveException::getInstance("illegal move, error code: " + to_string(response) + "\n");
+
     return response;
 }
 
@@ -620,4 +631,8 @@ ostream& operator<<(ostream& os,Board& board) {
     }
     board.best_moves.clear();
     return os;
+}
+
+bool Board::is_valid_location(const Location& location) {
+    return location.x >= BOARD_MIN_PLACE && location.x < BOARD_MAX_PLACE && location.y >= BOARD_MIN_PLACE && location.y < BOARD_MAX_PLACE;
 }

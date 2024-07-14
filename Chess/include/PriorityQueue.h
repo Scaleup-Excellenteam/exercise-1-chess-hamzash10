@@ -12,7 +12,7 @@ using namespace std;
 
 template<typename T>
 struct MyComparator {
-    bool operator()(const T& a, const T& b) const {
+    int operator()(const T& a, const T& b) const {
         return a.second - b.second;
     }
 };
@@ -51,8 +51,11 @@ void PriorityQueue<T, Comparator>::push(const T &value) {
     // add the path only if it contains three moves overall
     if(value.first.size()>=3) {
         auto it = queue.begin();
-        while (it != queue.end() && comp(value, *it)) {
-            ++it;
+        while (it != queue.end()) {
+            if(comp(*it,value) > 0)
+                ++it;
+            else
+                break;
         }
         queue.insert(it, value);
     }
