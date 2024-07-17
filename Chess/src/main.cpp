@@ -4,7 +4,7 @@
 #include "../include/Myexceptions.h"
 int main()
 {
-    //string board = "RNBQKBNR"
+    string board = "RNBQKBNR"
                    "PPPPPPPP"
                    "########"
                    "########"
@@ -12,23 +12,7 @@ int main()
                    "########"
                    "pppppppp"
                    "rnbqkbnr";
-    string board = "RNBQKBNR"
-                   "PPPPPP#P"
-                   "########"
-                   "######P#"
-                   "########"
-                   "####p###"
-                   "pppp#ppp"
-                   "rnbqkbnr";
-   //string board = "########"
-                  "####P###"
-                  "########"
-                  "########"
-                  "########"
-                  "########"
-                  "####p###"
-                  "########";
-    //string board = "RNBQKBNR################################################rnbqkbnr";
+
     shared_ptr<Board> engine_board(make_shared<Board>(board));
     Move& move = Move::getInstance(*engine_board);
     IllegalMoveException::getInstance("");

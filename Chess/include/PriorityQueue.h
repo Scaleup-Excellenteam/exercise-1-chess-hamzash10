@@ -49,16 +49,15 @@ T PriorityQueue<T, Comparator>::pull() const {
 template<typename T, typename Comparator>
 void PriorityQueue<T, Comparator>::push(const T &value) {
     // add the path only if it contains three moves overall
-    if(value.first.size()>=3) {
-        auto it = queue.begin();
-        while (it != queue.end()) {
-            if(comp(*it,value) > 0)
-                ++it;
-            else
-                break;
-        }
-        queue.insert(it, value);
+    auto it = queue.begin();
+    while (it != queue.end()) {
+        if(comp(*it,value) > 0)
+            ++it;
+        else
+            break;
     }
+    queue.insert(it, value);
+
 }
 
 #endif //CHESS_PRIORITYQUEUE_H

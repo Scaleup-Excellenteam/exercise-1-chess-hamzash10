@@ -9,6 +9,8 @@
 #include "Piece.h"
 #include "../include/PriorityQueue.h"
 #include "Myexceptions.h"
+#include <fstream>
+
 using namespace std;
 
 
@@ -47,7 +49,6 @@ class Board {
     shared_ptr<Piece> white_king, black_king;
     Player current_player;
     PriorityQueue<pair<vector<pair<Location,Location>>,int>> best_moves;
-
     //functions
     int check_illegal_moves(const Location& current,const Location& destination) const;
     int check_legal_moves(const Location& current,const Location& destination);
@@ -64,7 +65,7 @@ class Board {
     bool will_cause_checkmate();
     void change_places(const Location& current,const Location& destination,shared_ptr<Piece> destination_piece= nullptr);
     vector<shared_ptr<Piece>> get_all_pieces_of_player(Player player) const;
-    pair<vector<pair<Location,Location>>,int> calculate_values(Board board, Player current_player, const int& depth);
+    pair<vector<pair<Location,Location>>,int> calculate_values(Board board, Player current_player, const int& depth, const int &starting_depth);
     int threatened_by_weaker_piece(const Location &location);
     int threatening_stronger_piece(const Location &location);
     int get_piece_value( const Location& location) const;
