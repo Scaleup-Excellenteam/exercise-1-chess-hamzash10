@@ -1,12 +1,15 @@
 // Chess 
-#include "Chess.h"
+#include "../include/Chess.h"
+#include "../include/Board.h"
 
 int main()
 {
-	string board = "RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr"; 
-//	string board = "##########K###############################R#############r#r#####";
+	string board = "RNBQKBNRPPPPPPPP################################pppppppprnbqkbnr";
+	//string board = "##########K###############################R#############r#r#####";
+    //string board = "RNBQKBNR################################################rnbqkbnr";
 	Chess a(board);
-	int codeResponse = 0;
+    shared_ptr<Board> engine_board(make_shared<Board>(board));
+    int codeResponse = 0;
 	string res = a.getInput();
 	while (res != "exit")
 	{
@@ -26,13 +29,12 @@ int main()
 
 		/**/ 
 		{ // put your code here instead that code
-			cout << "code response >> ";
-			cin >> codeResponse;
+            codeResponse=engine_board->move(res);
 		}
 		/**/
 
 		a.setCodeResponse(codeResponse);
-		res = a.getInput(); 
+		res = a.getInput();
 	}
 
 	cout << endl << "Exiting " << endl; 

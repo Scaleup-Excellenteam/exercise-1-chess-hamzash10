@@ -1,0 +1,14 @@
+# Ignore CLion project files
+/.idea
+/cmake-build-debug
+
+# Ignore compiled binaries and build output
+*.exe
+*.obj
+/CMakeFiles
+/build
+
+# Ignore temporary files
+*.tmp
+
+# Ignore any other build or system-generated files
