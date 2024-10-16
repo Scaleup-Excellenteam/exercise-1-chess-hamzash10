@@ -1,2 +1,17 @@
 i used clion to write the code, so that is how i ran it
 also i used the MinGW compiler because the <Windows.h> is included in it, so the Cygwin compiler doesnt work
+
+algorithm:
+
+the algorithm works recursively this way:
+if depth>0
+get all the current player pieces and run through them one by one
+for each piece get all the moves it can preform, and check if the move isn't illegal using check_illegal_move()
+then check if the move is legal if so calculate the value of the move
+and subtract from it the value of the next opponent best move using the same function recursively
+after getting all the possible routes add best valued one to the queue
+
+exceptions:
+you guys didnt provide any info about what the exception handling should look like also all of the exception are handled
+in the Chess.cpp so there is really no point of it. however i made an interesting way to throw the exceptions that i made
+using singletons that store the exception and used in the Chess.cpp to show the error code

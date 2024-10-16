@@ -19,3 +19,10 @@ char Piece::get_type() const {
 Player Piece::get_color() const {
     return color;
 }
+
+ostream &operator<<(ostream &os, const Location &loc) {
+    char row = 'a' + loc.y;
+    int col = loc.x+1;
+    os <<row<<col;
+    return os;
+}

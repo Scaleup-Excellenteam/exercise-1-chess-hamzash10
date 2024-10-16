@@ -6,14 +6,27 @@
 #define CHESS_PIECE_H
 
 #include <memory>
+#include <vector>
+
 using namespace std;
 
+const int BOARD_MAX_PLACE = 8;
+const int BOARD_MIN_PLACE = 0;
 
 struct Location{
     int x;
     int y;
+    bool operator!=(const Location& rhs) {
+        return x!=rhs.x | y!=rhs.y;
+    }
+    bool operator==(const Location& other) const {
+        return x == other.x && y == other.y;
+    }
 };
 
+ostream& operator<<(std::ostream& os, const Location& loc);
+
+static int call=0;
 enum Player{
     White,
     Black,
@@ -40,6 +53,8 @@ public:
     virtual void move(const Location &destination) = 0;
 
     virtual bool is_legal_move(const Location& destination) = 0;
+
+    virtual vector<shared_ptr<Location>> all_possible_moves()=0;
 };
 
 #endif //CHESS_PIECE_H

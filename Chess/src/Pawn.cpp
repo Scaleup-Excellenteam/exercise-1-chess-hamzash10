@@ -46,3 +46,32 @@ bool Pawn::is_legal_move(shared_ptr<Piece> piece_to_attack) {
     }
     return false;
 }
+
+vector<shared_ptr<Location>> Pawn::all_possible_moves() {
+    vector<shared_ptr<Location>> possible_moves;
+
+    int legal_moves = (color == Player::White) ? 1 : -1;
+
+    // Forward movement
+    Location forward_one = {_location.x, _location.y + legal_moves};
+    if (is_legal_move(forward_one)) {
+        possible_moves.push_back(make_shared<Location>(forward_one));
+    }
+
+    // Double forward movement on first move
+    Location forward_two = {_location.x, _location.y + 2 * legal_moves};
+    if (is_legal_move(forward_two)) {
+        possible_moves.push_back(make_shared<Location>(forward_two));
+    }
+
+    // Diagonal captures
+    Location diagonal_left = {_location.x - 1, _location.y + legal_moves};
+    Location diagonal_right = {_location.x + 1, _location.y + legal_moves};
+    if (is_legal_move(diagonal_left)) {
+        possible_moves.push_back(make_shared<Location>(diagonal_left));
+    }
+    if (is_legal_move(diagonal_right)) {
+        possible_moves.push_back(make_shared<Location>(diagonal_right));
+    }
+    return possible_moves;
+}

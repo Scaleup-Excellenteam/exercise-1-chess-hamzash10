@@ -108,16 +108,24 @@ void Chess::displayBoard() const
 {
 	clear();
 	show();
+    cout<<move<<endl;
 	cout << m_msg<< m_errorMsg;
-	
+	cout<<IllegalMoveException::getInstance()->what();
+    cout<<BoardStateException::getInstance()->what();
 }
 // print the who is turn before getting input 
 void Chess::showAskInput() const 
-{
-	if (m_turn)
-		cout << "Player 1 (White - Capital letters) >> ";
-	else
-		cout << "Player 2 (Black - Small letters)   >> ";
+{   if(m_codeResponse!=44) {
+        if (m_turn)
+            cout << "Player 1 (White - Capital letters) >> ";
+        else
+            cout << "Player 2 (Black - Small letters)   >> ";
+    }else{
+        if (m_turn)
+            cout << "Player 2 WON! (enter any key to exit) >> ";
+        else
+            cout << "Player 1 WON! (enter any key to exit) >> ";
+    }
 }
 // check if the source and dest are the same 
 bool Chess::isSame() const 
@@ -148,7 +156,30 @@ void Chess::excute()
 
 	row = (m_input[2] - 'a');
 	col = (m_input[3] - '1');
-	m_boardString[(row * 8) + col] = pieceInSource; 
+	m_boardString[(row * 8) + col] = pieceInSource;
+
+    // if there is castling also move the rook
+    if(m_codeResponse==43){
+        //check if its king side
+        //if the piece moved to the king side
+        if(m_input[3]-m_input[1]>0){
+            //get the king side rook
+            pieceInSource = m_boardString[(row * 8) + col + 1];
+            //empty its place
+            m_boardString[(row * 8) + col + 1] = '#';
+
+            // put the king side rook left of the king
+            m_boardString[(row * 8) + col - 1] = pieceInSource;
+        }else{// on the queen side
+            //get the queen side rook
+            pieceInSource = m_boardString[(row * 8) + col - 2];
+            //empty its place
+            m_boardString[(row * 8) + col - 2] = '#';
+
+            // put the queen side rook right of the king
+            m_boardString[(row * 8) + col + 1] = pieceInSource;
+        }
+    }
 
 	setPieces(); 
 }
@@ -197,12 +228,26 @@ void Chess::doTurn()
 		m_msg = "the last movement was legal \n";
 		break;
 	}
+    case 43:
+    {
+        excute();
+        m_turn = !m_turn;
+        m_msg = "the last movement was legal - Castling \n";
+        break;
+    }
+    case 44:
+    {
+        excute();
+        m_turn = !m_turn;
+        m_msg = "checkmate \n";
+        break;
+    }
 	}
 }
 
 // C'tor
 Chess::Chess(const string& start)
-	: m_boardString(start),m_codeResponse(-1)
+	: m_boardString(start),m_codeResponse(-1),move(Move::getInstance())
 {
 	setFrames();
 	setPieces();
@@ -222,6 +267,10 @@ string Chess::getInput()
 	showAskInput();
 
 	cin >> m_input;
+
+    if(m_codeResponse==44)
+        return "exit";
+
 	if (isExit())
 		return "exit";
 	while (!isValid() || isSame())
@@ -252,6 +301,7 @@ void Chess::setCodeResponse(int codeResponse)
 {
 	if (((11 <= codeResponse) && (codeResponse <= 13)) ||
 		((21 == codeResponse) || (codeResponse == 31)) ||
-		((41 == codeResponse) || (codeResponse == 42)))
+		((41 == codeResponse) || (codeResponse == 42)) ||
+        ((43 == codeResponse) || (codeResponse == 44)))
 		m_codeResponse = codeResponse;
 }
